@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test outputs / generated artifacts
+captures/
+*.png.local
+test-output/
+*.local.json
+examples/**/*.local.*
+
+# Outputs of running the skill against this repo during development
+# (commit these intentionally when they're real examples — these defaults just guard
+# against accidental commits while iterating)
+/design.md
+/design-tokens.json
+/design-a11y.md
+/capture.png
+/capture-desktop.png
+/capture-tablet.png
+/capture-mobile.png
+
+# Playwright artifacts
+playwright-report/
+test-results/
+.playwright/
+
+# Environment
+.env
+.env.local
+.env.*.local

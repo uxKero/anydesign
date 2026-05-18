@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   properties extracted from the live Geist design system. Demonstrates the URL flow
   on a recognizable production site, including a real Geist token map and contrast
   report.
+- Downstream-consumption demo: `examples/v0-downstream-demo/` — screenshot of a
+  v0-generated app built from a `design.md` produced by this skill, with live URL
+  ([v0-anydesignexample.vercel.app](https://v0-anydesignexample.vercel.app/)). Proves
+  the output is portable across AI builders.
+
+### Changed
+- README rewritten with a hero image (the v0 downstream demo) and explicit portability
+  positioning. New sections: "Works with any AI builder" (compatibility table) and
+  "Standalone CLI scripts" (the four Python tools are usable without Claude).
 
 ---
 

@@ -29,6 +29,8 @@ reconstruction.
 
 ## 1. Visual identity
 
+### 1.1 Surface description
+
 **Personality** (3-5 adjectives): clinical, calm, developer-targeted, restrained,
 typographically-led
 
@@ -44,6 +46,36 @@ Dark surface with a single bright accent and lots of whitespace.
 "command-line green" rather than a marketing blue.
 
 **Confidence**: ✅ high — consistent signals across hero, features, and footer.
+
+### 1.2 Brand voice / Atmosphere
+
+**A tool for people who think in terminals.** The dark canvas is not a fashion choice —
+it's the surface developers already stare at all day, presented as if to say "you don't
+have to switch contexts to use this product." The emerald accent is the color of a
+healthy build, of `npm install` finishing without warnings — the brand borrows that
+positive-feedback green and asks: what if a note-taking tool felt the way passing tests
+feel?
+
+The restraint elsewhere protects this metaphor. There's no second accent because there
+can't be — adding magenta or violet would break the "this is a healthy terminal" reading.
+The mono caption beside the status indicator (a green dot in the footer) double-confirms
+the positioning: this product talks to you in the same language as your CI pipeline.
+
+### 1.3 The "ONE brand thing"
+
+- **The thing**: the **emerald accent** (`--color-accent` #10B981) applied with extreme
+  scarcity — primary CTAs and the wordmark only.
+- **Why it carries the brand**: the dark canvas could belong to any dev tool; the green
+  is what borrows the metaphor of "passing tests" and gives the brand its emotional
+  voltage. Remove it and the page is just another dark-themed product page.
+- **How everything else supports it**: the palette is otherwise slate-only. No second
+  accent. No decorative gradients. Even the feedback colors (success, warning, danger)
+  are reserved for explicit feedback contexts, never decorative.
+- **Where it appears (and where it deliberately doesn't)**: primary CTA fills, logo
+  wordmark, link hover state. Deliberately absent from body text, headings, borders,
+  and decorative space — those stay slate.
+
+**Confidence**: ✅ high — the scarcity rule is consistent across the captured surface.
 
 ---
 

@@ -38,6 +38,56 @@ Don't confuse "modern" with analysis. "Modern" means nothing — everything curr
 "modern". Talk about **what makes** it look current: variable typography, generous spacing,
 cool neutrals, implicit micro-interactions, etc.
 
+### Brand voice / Atmosphere (Section 1.2 of the output)
+
+After capturing the surface description, write **2-3 dense paragraphs of philosophical
+prose**. Not copywriting voice ("approachable yet premium"). Not Identity adjectives
+("clean, modern"). Something that forces a coherent set of follow-on design choices.
+
+The test: imagine a careful viewer reading your prose. Would they say "yes, this is
+exactly what this brand believes, and now I see why every choice they made follows from
+it"? If yes, you're there. If they'd say "this could describe any tech company", rewrite.
+
+Working examples:
+- Vercel → "Engineering quietude. The product surface is restrained because the platform
+  IS the product — marketing's job is to not dilute what infrastructure already promises."
+- Linear → "Software made by people who deploy software. The interface is so dense with
+  affordances because the audience reads code, not marketing copy."
+- Apple → "Permission to feel things in public about hardware. Every aesthetic move
+  protects the user's right to consider the object beautiful without irony."
+
+Each forces specific design choices. Vercel can't have a playful illustration; Linear
+can't have spacious whitespace; Apple can't have sarcastic copy. The Brand Voice IS the
+constraint set.
+
+### The "ONE brand thing" (Section 1.3 of the output)
+
+The single element that does the brand work alone. The thing you'd remove last, because
+removing it collapses the identity.
+
+Heuristic: walk through the captured surface and ask, *if I greyscaled / generic'd
+everything else, what one element would still scream "this is X"?* That's the ONE thing.
+
+Common shapes:
+- **A single chromatic moment** in an otherwise neutral palette (Vercel's mesh gradient,
+  Stripe's gradient ribbons, Linear's purple-blue accent)
+- **A typographic gesture** that nothing else does (Apple's huge display weight + tight
+  tracking, Söhne on Anthropic, Geist's specific tracking)
+- **A geometric move** (Tesla's wide condensed sans, Notion's emoji-as-iconography)
+- **A decoration scoping rule** (Cal.com's brand uses gradients ONLY for hero +
+  empty-state illustrations — never inline)
+
+Document:
+1. **What the thing is** (concrete: hex / typeface / asset).
+2. **Why it carries the brand** (what would be lost without it).
+3. **How everything else supports it** (the restraint of the surroundings is what makes
+   the ONE thing readable).
+4. **Where it appears AND where it deliberately doesn't** (scoping discipline — Vercel's
+   mesh gradient lives at hero scale only).
+
+If you can't identify a ONE thing: say so. Some systems are deliberately neutral (admin
+dashboards, white-label products). Don't fabricate.
+
 ---
 
 ## Layer 2 — System (tokens)
@@ -346,12 +396,96 @@ too" — they're observation made explicit.
 
 ---
 
+## Art Direction Patterns — QA pass before finalizing
+
+After completing Layers 1-6, **do not close the analysis yet**. Run this checklist as a
+QA pass — these are patterns shallow analysis routinely misses. Each one prompts:
+"Did I notice this? If yes, did I document it in the right section? If no, am I
+certain it's absent, or did I just not look?"
+
+These patterns cut across Layers 1-6 — that's why they live in a separate pass. They
+are what separates a "lists what I see" report from a "diagnoses how it works" report.
+
+### Surface-rhythm patterns
+
+- [ ] **Polarity-flipped section bands** — does the page alternate light ↔ dark surfaces
+  as you scroll, with content inverting onto each polarity? If yes → document in
+  Section 2.5 (Decorative depth) AND Section 4.2 (Composition patterns).
+- [ ] **Atmospheric gradient scoping** — is there a gradient/mesh/wash that lives in
+  ONE specific zone (typically the hero) and is forbidden everywhere else? If yes →
+  Section 2.5 (Decorative depth) and call out the scoping discipline.
+- [ ] **Density alternation** — does the page swing between minimalist zones (heroes,
+  marketing intros) and dense zones (footer link matrices, pricing tables, feature
+  comparison grids)? Document the rhythm.
+
+### Token coexistence patterns
+
+- [ ] **Pill scale coexistence** — does the system use two distinct radii deliberately
+  (e.g., 6px for nav-scale controls + 100px pill for marketing CTAs)? Are they ever
+  mixed on the same screen, or kept in separate contexts? Document AS A RULE in
+  Section 6 Do's/Don'ts.
+- [ ] **Mono usage scope** — is the monospaced face reserved for code only, or also
+  used for captions / eyebrow text / status labels? If "platform brand uses mono for
+  status indicators", that's signal → Section 6.
+- [ ] **Weight ceiling** — does the display type cap at a specific weight (often 600)
+  while the rest of the system has heavier weights available but unused? If yes,
+  that's a deliberate brand discipline → Section 6 Don'ts.
+- [ ] **Tracking discipline** — is there a clear convention (e.g., negative tracking
+  on display, neutral on body)? Document in Section 2.2 and reinforce in Section 6.
+
+### Color discipline patterns
+
+- [ ] **Color "voltage"** — is there exactly ONE chromatic moment in an otherwise
+  neutral palette? (This is often THE "ONE brand thing".) Where does it appear?
+  Where is it deliberately absent?
+- [ ] **Alpha overlay scale** — is there a parallel alpha-only scale alongside the
+  solid color scale (for overlays on photography / gradients)? If yes, that signals
+  a mature system → Section 2.1.
+- [ ] **Feedback colors restraint** — are success/warning/error colors used only in
+  feedback contexts, or do they leak into decorative use? Restraint = signal.
+
+### Elevation discipline patterns
+
+- [ ] **Stacked vs single-drop shadows** — does the system layer multiple small drops
+  (Geist-style) or use single heavy drops (Material-style)? If stacked → Section 6 Do.
+- [ ] **Inset-shadow-as-border** — does the system use inset 1px shadows in place of
+  real CSS borders for sub-pixel crispness on Retina? Subtle but signal.
+- [ ] **Surface-tone vs shadow for elevation** — does the system establish depth via
+  surface color change (dark theme cards on darker background) instead of shadows?
+  If yes → say so in Section 2.5.
+
+### Composition discipline patterns
+
+- [ ] **Split-hero vs centered-hero** — which is canonical for the brand? Mixing both
+  on the same surface is usually a smell.
+- [ ] **Asymmetric whitespace** — does the layout use deliberate asymmetric whitespace,
+  or is it symmetric/centered throughout? This is a strong stylistic marker.
+- [ ] **Image treatment consistency** — do all images share treatment rules (grayscale
+  → color on hover, fixed aspect, consistent placeholder)? Inconsistency = either
+  legacy debt or deliberate variety.
+
+### How to use this checklist
+
+- After finishing Layers 1-6, walk through every item.
+- If a pattern is **present** → ensure it's documented in the right section, and
+  consider whether it should also appear as a rule in Section 6 Do's/Don'ts.
+- If a pattern is **absent** → ask whether you're confident in its absence (not just
+  "didn't see it"). For some brands the absence is the signal (e.g., "no atmospheric
+  gradients — the design earns its mood through type and surface alone").
+- If a pattern is **ambiguous** → list as an Open Question in Section 7.
+
+**Don't pad the design.md by mentioning every checklist item that isn't there.** Only
+surface absences when they ARE diagnostic ("no shadows — flat-by-design"). Otherwise
+just confirm the present patterns are covered.
+
+---
+
 ## How to use all this
 
 It's not a mechanical checklist. It's a **scaffold** so the analysis doesn't stay shallow.
 You pass through the 6 layers in order, giving more depth to those the material supports
-and to the emphasis the user requested.
+and to the emphasis the user requested. Then you run the Art Direction Patterns QA pass.
 
 If the user said "I want mood/reference", Layer 1 weighs more. If they said "extract
 tokens", Layer 2. If they said "reconstruction", Layers 5-6. But **all layers are
-covered**, even briefly.
+covered**, even briefly, and **the QA pass is non-negotiable**.

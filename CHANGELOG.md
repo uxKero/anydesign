@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — analytical depth (Sprint 2)
+
+- **Section 1.2 "Brand voice / Atmosphere"** in every generated `design.md` — 2-3
+  dense paragraphs of philosophical prose that explain the *why* behind the surface
+  choices, not just the surface description. Forces specific design follow-ons rather
+  than generic "modern and clean" copy.
+- **Section 1.3 "The 'ONE brand thing'"** — identifies the single element that does
+  the brand work alone (the gesture you'd remove last because removing it collapses
+  the identity). Documents: what it is, why it carries the brand, how everything else
+  is restrained to support it, where it appears and where it deliberately doesn't.
+- **Art Direction Patterns QA pass** at the end of `analysis-framework.md` — a
+  non-negotiable checklist of patterns shallow analysis routinely misses, grouped
+  by category: surface-rhythm patterns (polarity flips, atmospheric gradient scoping,
+  density alternation), token coexistence (pill scale, mono usage, weight ceilings,
+  tracking discipline), color discipline (voltage allocation, alpha overlays,
+  feedback color restraint), elevation discipline (stacked vs single drops,
+  inset-shadow-as-border, surface-tone elevation), composition discipline (split vs
+  centered hero, asymmetric whitespace, image treatment).
+- Methodology guidance in Layer 1 of the framework for Brand voice writing (with
+  working examples for Vercel / Linear / Apple) and the ONE-brand-thing heuristic
+  (with common shapes: chromatic moment, typographic gesture, geometric move,
+  decoration scoping rule).
+- Vercel example: new Brand voice paragraph ("Engineering quietude...") and ONE
+  brand thing identified (the mesh gradient with scoping discipline).
+- Synthetic Lumen example: Brand voice ("a tool for people who think in terminals")
+  and ONE brand thing (the scarcity-applied emerald accent).
+- SKILL.md updated to surface the QA pass as part of Step 3.
+
 ### Added — structural depth (Sprint 1)
 
 - **Section 6: Do's and Don'ts** — new mandatory section in every generated `design.md`.

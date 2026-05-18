@@ -39,6 +39,8 @@ typography with negative tracking on headings, suggesting Inter or Geist.*
 
 ## 1. Visual identity
 
+### 1.1 Surface description
+
 **Personality** (3-5 adjectives): [adjectives]
 
 **Mood**: [what emotion it conveys, briefly]
@@ -51,6 +53,40 @@ typography with negative tracking on headings, suggesting Inter or Geist.*
 **Implicit positioning**: [who this design speaks to — devs, enterprise, creatives, etc.]
 
 **Confidence**: [✅ high | ⚠️ medium | ❓ low]
+
+### 1.2 Brand voice / Atmosphere
+
+[2-3 dense paragraphs answering: **what does this design BELIEVE about its audience, and
+how does every aesthetic choice line up with that belief?** This is not the surface
+description (Section 1.1) — this is the *philosophical why* behind the surface.
+
+Concrete vs vague: "developer-targeted" is Identity (vague, surface). "The product
+surface is restrained because the platform IS the product — marketing's job is to not
+dilute what infrastructure already promises" is Brand Voice (specific, philosophical,
+forces a coherent set of follow-on choices).
+
+Avoid generic copywriting voice ("approachable yet premium", "modern and friendly").
+Force yourself to write something the brand would *agree* describes them but that a
+generic designer couldn't have written without seeing this specific design.]
+
+### 1.3 The "ONE brand thing"
+
+The single element that does the brand work alone — the gesture that, if removed,
+collapses the brand identity. Everything else is restrained *relative to* this one
+thing.
+
+- **The thing**: [color / typography move / decorative element / geometric move / etc.]
+- **Why it carries the brand**: [what would be lost if you removed or weakened it]
+- **How everything else supports it**: [what's deliberately restrained to make this
+  stand out]
+- **Where it appears (and where it deliberately doesn't)**: [scoping discipline — is
+  it allowed only in the hero? Only on CTAs? Never in product UI?]
+
+*Confidence*: [✅ | ⚠️ | ❓]
+
+*Most strong design systems have ONE such thing. If you can't identify it, the system
+is either very young, deliberately neutral (like internal admin tools), or you don't
+have enough material yet. Say so explicitly — don't invent one.*
 
 ---
 

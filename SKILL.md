@@ -86,12 +86,17 @@ Analyze the material in **6 layers**, from general to specific. Full methodology
 
 | Layer | What to identify |
 |---|---|
-| **1. Identity** | Visual personality, mood, stylistic references, keywords |
+| **1. Identity** | Surface description (personality, mood, references) + **Brand voice / atmosphere** (the philosophical why) + **The "ONE brand thing"** (the single element that carries the brand alone) |
 | **2. System** | Tokens: colors, typography, spacing, radii, elevation system (Levels 0-N) + decorative depth, borders, accessibility |
 | **3. Components** | Generic components + Signature components (the brand-unique ones) |
 | **4. Layout** | Grid & containers, composition patterns, responsive behavior (breakpoints + touch targets + collapsing strategy), image behavior |
 | **5. Reconstruction** | Suggested stack, quick wins, tricky bits, confidence map |
 | **6. Brand rules** | Do's and Don'ts — explicit, brand-specific usage rules for downstream AI agents |
+
+After completing Layers 1-6, **run the Art Direction Patterns QA pass** documented at the
+end of `references/analysis-framework.md`. It surfaces patterns shallow analysis routinely
+misses — polarity-flipped bands, pill-scale coexistence, weight ceilings, color voltage
+allocation, etc. The QA pass is non-negotiable.
 
 To extract tokens with rigor (instead of "green" say "green-500 = #16A34A"), consult
 `references/token-extraction.md`. For accessibility quick-checks on extracted color pairs,

@@ -33,6 +33,8 @@ reconstruction map.
 
 ## 1. Visual identity
 
+### 1.1 Surface description
+
 **Personality** (3-5 adjectives): editorial, monochromatic, precise, restrained,
 typographically-led
 
@@ -58,6 +60,47 @@ typography, density, and information hierarchy speak to people who deploy code.
   like a print magazine masthead.
 
 **Confidence**: ✅ high — consistent across the captured area.
+
+### 1.2 Brand voice / Atmosphere
+
+**Engineering quietude.** The product surface is restrained because the platform IS the
+product — marketing's job is to not dilute what infrastructure already promises. Every
+choice line ups: monochrome palette (no need to perform color when uptime performs
+itself), sentence-case headlines (caps would shout, and the platform doesn't shout),
+mono-spaced status indicator in the footer (the brand wants you to know it runs servers,
+not campaigns), all-caps tiny footer labels (the masthead of a serious publication, not
+a startup landing).
+
+The mesh gradient is the **one place where the brand admits there's a marketing function
+to perform** — and it's quarantined to the hero so it doesn't infect the rest of the
+surface. The polarity-flipped bands further enforce the discipline: each band gets its
+own polarity, recommits to monochrome, then moves on. There's no decorative drift, no
+"let's add a small gradient accent here". The decoration is a tightly scoped admission,
+not a vocabulary.
+
+This belief — that infrastructure should be visible only at the moments that demand it —
+is why a developer reading the page never feels sold-to. They feel *acknowledged as the
+audience that doesn't need to be sold to*. Which is, in turn, what closes the deal.
+
+### 1.3 The "ONE brand thing"
+
+- **The thing**: the **mesh gradient** behind the Vercel triangle in the hero — multi-stop
+  orange → yellow → green → teal, scoped to a single zone.
+- **Why it carries the brand**: it's the ONLY chromatic moment on a near-monochrome
+  surface. Remove it and the page reads as a generic developer-tool landing — well-typeset
+  but indistinguishable from a dozen Linear-adjacent SaaS sites. The gradient *is* what
+  makes someone glance at the page and know it's Vercel.
+- **How everything else supports it**: the entire rest of the design is restrained
+  *relative to* this one element. The palette is reduced to grays + ink so the gradient's
+  saturation has nowhere to compete. Headlines are weight 600, not 700+, so they don't
+  out-shout the visual moment. The mesh has the only saturated hues on the page; every
+  other "color" is a feedback semantic (success green, error red) used in micro-contexts.
+- **Where it appears (and where it deliberately doesn't)**: hero zone only. Never
+  miniaturized to an icon. Never reduced to a single color. Never re-used as a decorative
+  flourish elsewhere. The scoping is the discipline.
+
+**Confidence**: ✅ high — this is widely understood as Vercel's signature move within
+the design community, and the captured surface confirms the discipline.
 
 ---
 

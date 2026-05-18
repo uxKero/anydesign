@@ -9,7 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Added — structural depth (Sprint 1)
+
+- **Section 6: Do's and Don'ts** — new mandatory section in every generated `design.md`.
+  Brand-specific usage rules (5-7 of each) grounded in observation, citing tokens
+  explicitly. Skill is instructed to abstain rather than pad with generic UX advice
+  if evidence is thin.
+- **Layer 6 in the analysis framework** — new top-level analytical layer for brand
+  rules, with categories (color discipline, typography discipline, elevation
+  discipline, etc.) and explicit "when to abstain" guidance.
+- **Elevation system tiers** (Section 2.5) — restructured from a flat "Shadows" list
+  to a named Level 0-N table with `treatment` + `use` per level, plus a new
+  `Decorative depth` subsection for polarity flips, atmospheric gradients, and
+  background patterns.
+- **Signature components** (Section 3.2) — new subsection separating
+  brand-distinctive UI motifs (e.g., Vercel's mesh-gradient hero, polarity-flipped
+  bands, dot-grid pattern) from generic primitives. Explicit "no signatures detected"
+  fallback when patterns are generic.
+- **Responsive behavior table** (Section 4.3) — formal Breakpoints / Touch targets /
+  Collapsing strategy structure replacing the previous prose-only mention.
+- **Image behavior** (Section 4.4) — new subsection categorizing images by role
+  (decorative gradient, brand logo, product mockup, photography, icons) with
+  per-category treatment specs.
+- Vercel example updated to demonstrate all five new structural pieces; includes
+  4 signature components, 7-level elevation table, populated responsive behavior
+  (honest about desktop-only confidence), 7 Do's + 7 Don'ts.
+- Synthetic landing-example updated for consistency with the new spec.
+
+### Added — earlier
 - Real end-to-end example: `examples/vercel-landing/` — full analysis of vercel.com
   produced by running the skill against the live site (`design.md`,
   `design-tokens.json`, `design-a11y.md`, real desktop screenshot). 808 CSS custom

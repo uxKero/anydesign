@@ -1,9 +1,9 @@
 # Output Template — The design.md template
 
-This is the **base** template of the `design.md` file the skill generates. Use it as the output
-contract. Adapt the depth of each section based on the user's emphasis (reconstruction / mood /
-system), but **don't remove sections** unless explicitly empty due to lack of info — in which
-case, say so.
+This is the **base** template of the `design.md` file the skill generates. Use it as the
+output contract. Adapt the depth of each section based on the user's emphasis
+(reconstruction / mood / system), but **don't remove sections** unless explicitly empty
+due to lack of info — in which case, say so.
 
 ---
 
@@ -97,11 +97,34 @@ typography with negative tracking on headings, suggesting Inter or Geist.*
 - `md`: 12px (cards)
 - `full`: 9999px (avatars, badges)
 
-### 2.5 Shadows
+### 2.5 Elevation system
 
-- `shadow-sm`: visible on cards on hover, subtle
-- `shadow-md`: on modals and elevated elements
-*[Or "No shadows detected — flat design" if applicable.]*
+Levels declared 0-N where Level 0 is "flat / no chrome" and higher numbers mean greater
+elevation. Each level has a **treatment** (the CSS recipe) and a **use** (where it appears
+on the surface).
+
+| Level | Name | Treatment | Use |
+|---|---|---|---|
+| 0 | Flat | No shadow, no border | Full-bleed bands, hero |
+| 1 | Hairline | `1px solid #E5E7EB` | Default card chrome |
+| 2 | Subtle drop | `0 1px 2px rgba(0,0,0,0.04)` + hairline | Hovered cards |
+| 3 | Stack | `0 2px 4px + 0 4px 8px rgba(0,0,0,0.05)` | Floating menus, popovers |
+| 4 | Modal | Multi-stop stack `0 8px 16px + 0 24px 32px` | Dialogs, fullscreen overlays |
+
+*If the system uses only one or two tiers, **say so explicitly** — many brands deliberately
+avoid heavy elevation. Don't fabricate a 5-tier system that isn't there.*
+
+#### Decorative depth (non-functional)
+
+Atmospheric effects that establish visual depth without serving UI elevation:
+
+- **Polarity flips**: light/dark band alternation between page sections (depth by surface
+  inversion, not shadow)
+- **Atmospheric gradients**: hero meshes, ambient washes — typically scoped to a single
+  area, never miniaturized
+- **Background patterns**: dot grids, noise, subtle textures applied as `background-image`
+
+*Omit this subsection if the design has no decorative depth cues.*
 
 ### 2.6 Borders
 
@@ -109,11 +132,24 @@ typography with negative tracking on headings, suggesting Inter or Geist.*
 - Thickness: 1px
 - Focus states: 2px ring in `primary` with opacity
 
+### 2.7 Accessibility quick-check
+
+See companion `design-a11y.md`. Summary:
+- `text-primary` on `surface`: **17.06:1** — AAA ✅
+- `accent` on `surface`: **6.96:1** — AA ✅, AAA large ✅
+
+*Omit this subsection if fewer than 2 colors with clear text/surface relationships were
+captured.*
+
 ---
 
 ## 3. Components Inventory
 
-### Button
+### 3.1 Generic components
+
+Standard UI primitives that any system has (Button, Input, Card, Badge, etc.). For each:
+
+#### Button
 - **Variants**: primary (bg-primary), ghost (transparent + border)
 - **Observed sizes**: md (40px tall)
 - **Visible states**: default
@@ -121,26 +157,87 @@ typography with negative tracking on headings, suggesting Inter or Geist.*
 - **Radius**: 6px
 - **Confidence**: ✅ high
 
-### Input
+#### Input
 - **Variants**: single text
 - **Visible states**: empty, focus
 - **Border**: 1px solid border, primary focus ring
 - **Confidence**: ⚠️ medium — only saw one case
 
-### Card
-[...continue with each observed component]
+[...continue with each observed generic component]
+
+### 3.2 Signature components
+
+UI patterns that are uniquely the brand's — the "if you see this, you know which product
+this is" elements. These are the components a competitor would have to deliberately avoid
+copying.
+
+#### [Component name — e.g., "Mesh-gradient hero"]
+- **What it is**: brief description of the pattern
+- **Why it's signature**: what makes it distinct vs. a generic equivalent
+- **Composition**: how it's built (tokens used, layered effects)
+- **Where it appears**: hero only, every page, etc.
+- **Confidence**: [✅ | ⚠️ | ❓]
+
+*If the design uses only generic patterns and has no clearly distinctive UI motif, write:
+"No signature components detected — system uses standard UI primitives." Don't force it.*
 
 ---
 
 ## 4. Layout & Composition
 
+### 4.1 Grid & containers
+
 - **Inferable grid**: container max-width ~1280px, horizontal padding 24px on desktop
-- **Inferable breakpoints**: [if responsive info exists, list it; if not, say "only desktop
-  material visible"]
 - **Vertical rhythm**: sections separated by ~96px
-- **Observed composition patterns**: centered hero, 3-column feature grid, dense footer
 - **Visual hierarchy**: established by typographic size and color contrast (not by
   oversaturated color)
+
+### 4.2 Composition patterns
+
+- Centered hero
+- 3-column feature grid
+- Dense footer with 5-column link matrix
+
+### 4.3 Responsive behavior
+
+#### Breakpoints
+
+| Name | Width | Key changes |
+|---|---|---|
+| Mobile | < 600px | Nav collapses to hamburger; 3-up grids drop to 1-up; hero stacks |
+| Tablet | 600–959px | 3-up grids drop to 2-up; nav still horizontal |
+| Desktop | 960–1279px | Full 3-up grids; sticky sidebar |
+| Wide | ≥ 1280px | Content caps at 1280px; gutters absorb the rest |
+
+*If only one viewport was captured, write: "Only desktop material captured — breakpoints
+inferred from fluid CSS / clamp() functions where present, otherwise marked ❓ low." Pair
+with the `--viewports` capture command in Open Questions.*
+
+#### Touch targets
+
+- Primary CTAs: ≥ 44 × 44px (WCAG AAA threshold)
+- Form inputs: ~48px height
+- *Note any patterns that fall below 44px and need adjustment.*
+
+#### Collapsing strategy
+
+- **Nav**: full horizontal at desktop → hamburger overlay at mobile
+- **Grids**: 3-up → 2-up → 1-up at the breakpoints above; cards keep `{rounded.md}` shape
+- **Hero**: stacks vertically at all breakpoints (no split-hero pattern)
+
+### 4.4 Image behavior
+
+How each kind of image is treated. List one per image category observed:
+
+- **Decorative gradient** (hero): inline SVG or canvas, scales fluidly with container, never
+  crops, never tiles
+- **Brand logo strip**: monochrome SVGs at consistent ~24px height
+- **Product mockups**: dark-mode mockup, treated as image at layout level
+- **Photography**: aspect ratio (16:9), placeholder treatment (skeleton, blur, dominant
+  color), lazy-load behavior
+- **Icons**: source set (Lucide, Heroicons, custom), stroke/fill convention
+
+*Omit this subsection if the source has no images — but say so explicitly.*
 
 ---
 
@@ -184,20 +281,63 @@ Probably exist but weren't captured — define before implementing:
 
 ---
 
-## 6. Open Questions
+## 6. Do's and Don'ts
+
+Explicit usage rules an AI agent (or human) should follow when extending this system.
+Each rule is **specific to this design**, not generic UX advice. Aim for 5-7 of each. Cite
+tokens explicitly (e.g., `text-primary`, `space-6x`) wherever possible.
+
+### Do
+
+- **Reserve `primary` for primary CTAs.** Don't use it for decorative or background fills.
+- **Use `radius-sm` (6px) for nav-scale interactive elements and `radius-md` (12px) for
+  cards.** The two scales coexist deliberately — don't mix.
+- **Set every headline in semibold (600) with negative tracking (-0.02em).** Aggressive
+  tracking is part of the voice.
+- **Use the mesh gradient at hero scale only.** Never miniaturize it to an icon, never
+  reduce to a single color.
+- **Layer multiple small shadows for elevation.** The brand's elevation system avoids
+  single heavy drops.
+- **Cycle surface tones in alternating bands** (`surface` → `surface-elevated` → `surface`)
+  rather than using a single background.
+- **Set every code/technical label in the monospaced face.** Mono is the voice of the
+  platform.
+
+### Don't
+
+- **Don't introduce a sixth accent color.** The brand operates with text + neutral + one
+  accent + the feedback semantics. New accents flatten the voice.
+- **Don't render headlines in all-caps.** Sentence-case + tight tracking is non-negotiable.
+- **Don't use a single heavy drop-shadow on cards.** The system uses stacked, layered
+  shadows.
+- **Don't promote font weights above 600 for display type.** The brand's weight ceiling is
+  semibold.
+- **Don't pair pill radius (full-rounded) and `radius-sm` (6px) on the same screen.** Pick
+  a scale and stay there.
+- **Don't set body paragraphs in the monospaced face.** Mono is reserved for code +
+  technical labels.
+
+*If you can't generate at least 3 Do's and 3 Don'ts grounded in observed patterns, write:
+"Insufficient evidence to derive brand-specific usage rules — only the token-level rules
+captured above apply." Don't fill with generic UX advice.*
+
+---
+
+## 7. Open Questions
 
 [List of things you COULDN'T determine that need user input or more material]
 
 - Does the site have dark mode? Saw no indications.
 - Are there Button variants besides primary and ghost?
 - Is the typography Inter or Geist? Need to see CSS to confirm.
-- What are the exact breakpoints? Only saw desktop.
+- What are the exact breakpoints? Only saw desktop — recommend
+  `python scripts/capture_site.py <URL> --viewports desktop,tablet,mobile`.
 
 *If no open questions, justify it: "Material sufficient for complete reconstruction."*
 
 ---
 
-## 7. Companion files
+## 8. Companion files
 
 - [ ] `design-tokens.json` — structured tokens in W3C DTCG format (`$value`/`$type`),
       ready for Style Dictionary, Figma Variables, Tokens Studio
@@ -209,7 +349,8 @@ Probably exist but weren't captured — define before implementing:
 ---
 
 *End of analysis. If you want to deepen any section, convert this into a prompt for Claude
-Code, or analyze another source to compare, let me know.*
+Code, v0, Lovable, or another generation tool, or analyze another source to compare, let
+me know.*
 ```
 
 ---
@@ -218,9 +359,9 @@ Code, or analyze another source to compare, let me know.*
 
 ### Adaptation based on emphasis
 
-- **If emphasis = reconstruction** → Section 5 more detailed, Section 1 briefer
-- **If emphasis = mood/reference** → Section 1 more detailed with rich vocabulary, Sections 2-3
-  briefer
+- **If emphasis = reconstruction** → Sections 5, 6 more detailed; Section 1 briefer
+- **If emphasis = mood/reference** → Section 1 more detailed with rich vocabulary;
+  Sections 2-3 briefer
 - **If emphasis = design system** → Sections 2-3 very detailed, plus always generate
   `design-tokens.json`
 
@@ -236,10 +377,15 @@ Code, or analyze another source to compare, let me know.*
 2. **TL;DR** of 2-3 sentences
 3. **Confidence map** at the end of Reconstruction Notes
 4. **Open Questions** (or justification of their absence)
+5. **Do's and Don'ts** (or justification — see Section 6 note)
 
-### What can be missing
+### What can be missing (with explicit justification)
 
-- Token sub-sections if the source doesn't support them (e.g., static image without detectable
-  typography info → omit the weights sub-section)
-- Components Inventory if the source only shows layout without clear components
-- Shadows if there are none
+- Token sub-sections if the source doesn't support them (e.g., static image without
+  detectable typography info → omit the weights sub-section, say so)
+- 3.2 Signature components if the design uses only generic patterns
+- 4.3 Responsive behavior breakpoint table if only one viewport was captured (still
+  include the section, populate with the "only desktop" note)
+- 4.4 Image behavior if the source has no images
+- 2.5 Decorative depth subsection if there are no atmospheric effects
+- 2.7 Accessibility quick-check if fewer than 2 color pairs available

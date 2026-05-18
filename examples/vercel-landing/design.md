@@ -189,22 +189,43 @@ that scales with viewport.
 | `--modal-radius` | 12px | Modals |
 | `--radius-3xl` | 1.5rem (24px) | Large container radius (Tailwind alignment) |
 
-### 2.5 Shadows
+### 2.5 Elevation system
 
-A complete 7-step elevation system:
+Vercel runs a **7-level stacked-shadow elevation** plus a parallel "inset hairline ring"
+applied to most card surfaces. The system's signature move: every elevated surface
+combines an inset 1px border (`--ds-shadow-border`) with one or more drop-shadow layers.
+The brand never uses a single heavy drop.
 
-| Token | Value (verbatim) |
-|---|---|
-| `--ds-shadow-2xs` | `0px 1px 1px #0000000a` |
-| `--ds-shadow-xs` | `0px 1px 2px #0000000a` |
-| `--ds-shadow-small` | `0px 2px 2px #0000000a` |
-| `--ds-shadow-medium` | `0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a` |
-| `--ds-shadow-large` | `0px 2px 2px #0000000a, 0px 8px 16px -4px #0000000a` |
-| `--ds-shadow-xl` | `0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f` |
-| `--ds-shadow-2xl` | `0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f` |
+| Level | Name | Treatment (verbatim CSS) | Use |
+|---|---|---|---|
+| 0 | Flat | No shadow, no border | Full-bleed hero band, dark polarity-flip bands |
+| 1 | Hairline | `0 0 0 1px #00000014` inset | Default card chrome — universal "this is a card" cue |
+| 2 | Subtle drop | `0px 1px 1px #0000000a` + hairline | Slight elevation, e.g. resting nav, light interactive states |
+| 3 | Small drop | `0px 1px 2px #0000000a` + hairline | Buttons / tag surfaces (`--ds-shadow-xs`) |
+| 4 | Medium | `0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a` + hairline | Standard cards, feature blocks (`--ds-shadow-medium`) |
+| 5 | Large stack | `0px 2px 2px #0000000a, 0px 8px 16px -4px #0000000a` + hairline | Pricing cards, callout panels (`--ds-shadow-large`) |
+| 6 | XL float | `0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f` | Floating menus, dropdowns (`--ds-shadow-xl`) |
+| 7 | Modal | `0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f` | Modals, dialogs (`--ds-shadow-2xl`) |
 
-Plus semantic compounds: `--ds-shadow-tooltip`, `--ds-shadow-menu`, `--ds-shadow-modal`,
-`--ds-shadow-fullscreen` — each composing the base shadows with a border-stroke shadow.
+Semantic compounds: `--ds-shadow-tooltip`, `--ds-shadow-menu`, `--ds-shadow-modal`,
+`--ds-shadow-fullscreen` — each composes base shadows with `--ds-shadow-border-base`.
+
+#### Decorative depth (non-functional)
+
+Three distinct atmospheric devices establish depth without using the elevation system:
+
+- **Polarity-flipped bands**: cycling between `--ds-background-100` (white) and
+  `--ds-gray-1000` (near-black) as page surface creates section-depth by inversion.
+  This is the chief band-rhythm cue. No shadow needed.
+- **Hero mesh gradient**: orange → yellow → green → teal multi-stop gradient wrapping
+  the Vercel triangle. Lives at hero scale only, never miniaturized to an icon, never
+  reduced to a single color.
+- **Dot-grid background pattern**: subtle 4px-spaced dot raster overlaid on the hero
+  surface. Implemented as `background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px)`
+  with appropriate sizing.
+
+The `--ds-shadow-border` (inset 1px) trick is itself worth noting: Vercel uses inset
+shadows in place of real borders for sub-pixel crispness on Retina displays.
 
 ### 2.6 Borders
 
@@ -235,7 +256,9 @@ See companion `design-a11y.md`. Summary:
 
 ## 3. Components Inventory
 
-### Button (primary, observed in hero CTA, "Ready to deploy?" CTA)
+### 3.1 Generic components
+
+#### Button — primary (observed in hero CTA, "Ready to deploy?" CTA)
 
 - **Fill**: `--ds-gray-1000` (#171717)
 - **Label**: `--ds-white` (#FFFFFF)
@@ -244,7 +267,7 @@ See companion `design-a11y.md`. Summary:
 - **Padding**: ~24px horizontal, ~10px vertical (visual estimate)
 - **Confidence**: ✅ high — observed in 2+ contexts
 
-### Button (secondary / outline, observed as "Get a Demo")
+#### Button — secondary / outline (observed as "Get a Demo")
 
 - **Fill**: `--ds-white` / transparent
 - **Border**: 1px via `--ds-shadow-border`
@@ -252,14 +275,14 @@ See companion `design-a11y.md`. Summary:
 - **Radius**: `--geist-radius` (6px)
 - **Confidence**: ✅ high
 
-### Button (ghost text link, observed as "Talk to an Expert")
+#### Button — ghost text link (observed as "Talk to an Expert")
 
 - **No fill, no border**
 - **Label**: `--ds-gray-1000`
 - **Hover**: presumably underline / opacity shift (not captured in static)
 - **Confidence**: ⚠️ medium — only one instance captured
 
-### Tag / Pill (observed in "Scale your [Enterprise] without compromising [Security]")
+#### Tag / Pill (observed in "Scale your [Enterprise] without compromising [Security]")
 
 - **Fill**: `--ds-gray-100` (#F2F2F2) very subtle
 - **Border**: 1px subtle (via `--ds-shadow-border`)
@@ -268,14 +291,7 @@ See companion `design-a11y.md`. Summary:
 - **Label**: `--ds-gray-1000`
 - **Confidence**: ✅ high
 
-### Status indicator (observed in footer)
-
-- **Form**: small filled circle (~8px diameter)
-- **Color**: `--ds-green-700` (#28A948) for "operational"
-- **Label**: tiny mono-spaced text alongside (likely from `--font-mono`)
-- **Confidence**: ✅ high
-
-### Top navigation
+#### Top navigation
 
 - **Layout**: horizontal, left-aligned product/resources/solutions dropdowns, right-aligned
   Sign In / Log In / Sign Up
@@ -283,32 +299,149 @@ See companion `design-a11y.md`. Summary:
 - **Items**: text-only with subtle hover (no visible bg change captured in static)
 - **Confidence**: ⚠️ medium — dropdowns not exercised
 
-### Footer link matrix
+#### Footer link matrix
 
 - **Structure**: 10 columns × variable rows of categorized links
 - **Section labels**: all-caps small (`--text-sm` or `--text-xs`), `--ds-gray-700`
 - **Links**: regular case, `--ds-gray-1000`
 - **Confidence**: ✅ high
 
+### 3.2 Signature components
+
+UI patterns that **are** the Vercel brand — the elements another developer-platform
+brand would have to deliberately avoid copying.
+
+#### Mesh-gradient hero asset
+
+- **What it is**: a multi-stop AI-colored gradient (orange / yellow / green / teal) that
+  wraps the Vercel triangle, occupying the hero zone.
+- **Why it's signature**: the rest of the page is monochrome by deliberate restraint.
+  The gradient is the ONLY chromatic moment — therefore it carries the entire brand
+  voltage. Replicating Vercel without it loses the brand.
+- **Composition**: layered SVG / CSS gradient (not extractable as a CSS variable —
+  treat as an asset), centered, scales fluidly with the hero container, never tiles.
+- **Where it appears**: hero only. Never miniaturized to icon, never reduced to a
+  single color.
+- **Confidence**: ✅ high
+
+#### Polarity-flipped section bands
+
+- **What it is**: rhythmic alternation between `--ds-background-100` (white) and
+  `--ds-gray-1000` (near-black) surfaces as you scroll, with content recomposed onto
+  each polarity.
+- **Why it's signature**: it's how Vercel establishes "depth between sections" without
+  shadow — a structural rhythm device, not just a styling choice. Linear and Stripe
+  use related-but-distinct patterns; this specific cycle is Vercel's.
+- **Composition**: full-bleed `background-color` swap per `<section>`; content tokens
+  invert (`text-primary` ↔ `text-on-primary`); CTA button polarity also flips.
+- **Where it appears**: throughout the marketing surface, ~every 2-3 sections.
+- **Confidence**: ✅ high
+
+#### Dot-grid hero background pattern
+
+- **What it is**: subtle 4px-spaced dot raster overlaid on the hero white surface,
+  visible behind the mesh gradient and triangle.
+- **Why it's signature**: Geist marketing surfaces have used this pattern consistently
+  for years — it's recognizable on sight as "a Vercel/Next.js property". Other dev
+  platforms use grids or noise; Vercel uses the dot raster specifically.
+- **Composition**: `background-image: radial-gradient(circle, rgba(0,0,0,~0.04) 1px, transparent 1px)`
+  with appropriate spacing.
+- **Where it appears**: hero zone only.
+- **Confidence**: ✅ high
+
+#### Operational status indicator (footer)
+
+- **What it is**: a small green filled circle (`--ds-green-700` #28A948) with a
+  mono-spaced text label, indicating system status.
+- **Why it's signature**: developer-platform brands signal "platform health is part of
+  the product surface". The mono caption next to the dot is the brand's way of saying
+  "we run infrastructure, not marketing". Linear, Stripe, GitHub use related patterns;
+  the mono caption is the Geist-specific signal.
+- **Composition**: 8px circle + `--font-mono` caption + link to status page.
+- **Where it appears**: footer.
+- **Confidence**: ✅ high
+
 ---
 
 ## 4. Layout & Composition
 
-- **Container**: `--geist-page-width` 1200px (used on the marketing surface)
+### 4.1 Grid & containers
+
+- **Container**: `--geist-page-width` 1200px (used on the marketing surface). A newer
+  `--ds-page-width: 1400px` coexists — the marketing surface uses 1200 in this capture.
 - **Horizontal padding**: ~24px on desktop
-- **Inferable breakpoints**: ❓ low — only desktop captured. Vercel's fluid typography
-  scale (`--text-fluid-*` and `--spacing-fluid-*`) implies viewport-aware scaling rather
-  than discrete breakpoints, but no responsive evidence in this capture.
 - **Vertical rhythm**: hero ≈ 600px tall; section blocks separated by `--geist-space-24x`
   (96px) approximately
-- **Composition patterns**:
-  - Hero: centered, vertical stack (eyebrow / h1 / sub / CTA-pair / brand graphic)
-  - Mid: "Develop with your favorite tools" — three line-items with inline icons
-  - Mid: "Scale your X without compromising Y" — large typographic phrase with inline pills
-  - CTA: split — primary CTA pair on the left, separate Enterprise pull-out on the right
-  - Footer: dense 10-column link matrix + brand mark + status indicator
 - **Visual hierarchy**: typography size + weight do nearly all of the work. Color
   contrast is limited to the binary (black on white, occasionally muted).
+
+### 4.2 Composition patterns
+
+- **Hero**: centered, vertical stack (eyebrow / h1 / sub / CTA-pair / brand graphic).
+  No split-hero pattern.
+- **Polarity-flipped section bands** (see Signature components 3.2): alternating
+  white / near-black surfaces structure the page rhythm.
+- **"Develop with your favorite tools"**: three line-items with inline icons + mono
+  technical labels.
+- **"Scale your X without compromising Y"**: large typographic phrase with inline
+  Tag/Pill components substituted for the X and Y nouns.
+- **Final CTA**: split — primary CTA pair on the left, separate "Explore Enterprise"
+  pull-out card on the right.
+- **Footer**: dense 10-column link matrix + brand mark + status indicator (see
+  Signature components).
+
+### 4.3 Responsive behavior
+
+#### Breakpoints
+
+| Name | Width | Key changes |
+|---|---|---|
+| Mobile | < ~600px | ❓ low — not captured; footer's 10-col matrix likely collapses to accordion; nav to hamburger |
+| Tablet | ~600–960px | ❓ low — not captured |
+| Desktop | ~960–1280px | ✅ captured; full 10-col footer, horizontal nav, hero centered |
+| Wide | > 1280px | ❓ low — container caps at `--geist-page-width` 1200; gutters absorb the rest |
+
+**Confidence**: ❓ low — only desktop captured. The CSS declares fluid tokens
+(`--text-fluid-*`, `--spacing-fluid-*`) suggesting viewport-aware scaling via `clamp()`
+rather than discrete breakpoints, but live responsive behavior was not exercised.
+
+To populate this table with real data, re-run:
+
+```bash
+python scripts/capture_site.py https://vercel.com/ \
+    --viewports desktop,tablet,mobile
+```
+
+#### Touch targets
+
+- **Primary CTA** ("Start Deploying"): ~40-44px tall in marketing context — at the WCAG
+  AAA threshold (44 × 44). Nav-scale buttons likely shrink below 44px (would need
+  mobile capture to confirm and validate against the 44 floor).
+- **Tag/Pill** components: small (~24px tall) — interactive role uncertain (some look
+  link-like, some decorative). Not safe to assume tap targets without mobile capture.
+
+#### Collapsing strategy
+
+- **Nav**: full horizontal product/resources/solutions dropdowns at desktop. Expected
+  to collapse to hamburger overlay at mobile — not captured.
+- **Hero**: vertical stack at desktop; should hold at all breakpoints (no split-hero).
+- **Section bands**: full-bleed surface stays; content reflows from 1280px container
+  to fluid width.
+- **Footer 10-col matrix**: expected to drop to 5 → 2 → 1 columns; mono status
+  indicator likely stays in place. Not captured.
+
+### 4.4 Image behavior
+
+- **Mesh-gradient hero asset** (see Signature components): inline SVG or canvas-painted,
+  scales fluidly with the hero container, never crops, never tiles, never reduced to a
+  single color or miniaturized.
+- **Vercel triangle logo**: monochrome SVG. Appears in nav (small) and inside the hero
+  gradient (larger). Same SVG, two scales.
+- **Customer / framework logos** (visible in "Develop with your favorite tools"
+  section): monochrome SVGs at consistent height (~24px); muted gray rendering, full
+  color on hover plausibly (not captured).
+- **No photography observed** in this capture. The marketing surface is purely
+  typographic + iconic.
 
 ---
 
@@ -350,17 +483,6 @@ v4 `@theme` directives and load `Geist Sans` via `next/font/google` or `geist/fo
   rare moments not visible in this capture. If your reconstruction needs it, it'll
   require licensing the Geist font family fully.
 
-### Responsive coverage gotcha
-
-Only the desktop layout was captured. Vercel's site collapses heavily on mobile (the
-10-column footer becomes a single accordion). Before assuming breakpoint values,
-re-capture with:
-
-```bash
-python scripts/capture_site.py https://vercel.com/ \
-    --viewports desktop,tablet,mobile
-```
-
 ### Implicit states to define
 
 - Button hover (visible color shift expected; not captured statically)
@@ -385,7 +507,55 @@ python scripts/capture_site.py https://vercel.com/ \
 
 ---
 
-## 6. Open Questions
+## 6. Do's and Don'ts
+
+Brand-specific usage rules grounded in observation. Use these to extend the system
+without drifting from Vercel's voice.
+
+### Do
+
+- **Reserve `--ds-gray-1000` (#171717) for primary CTAs and primary text only.** Black
+  ink is the conversion target — using it as a background fill or decorative element
+  flattens the brand.
+- **Layer multiple small drop-shadows + an inset hairline ring for elevation.** Vercel's
+  cards are NEVER a single heavy drop — the stacked-shadow + ring trick is the brand's
+  elevation signature.
+- **Use `--geist-radius` (6px) for nav/UI controls and `--geist-marketing-radius` (8px)
+  for marketing-scale surfaces.** The two scales coexist deliberately — pick the one
+  that matches the context.
+- **Cycle page surfaces in polarity-flipped bands** (`--ds-background-100` ↔
+  `--ds-gray-1000`). The dark band IS the depth cue between sections — don't substitute
+  shadow.
+- **Set every code block, technical eyebrow, or status caption in `--font-mono`.** Mono
+  is the brand's voice of "we run infrastructure".
+- **Display type at weight 600, sentence-case, with negative tracking** (`--tracking-tight`
+  or `--tracking-tighter`). Aggressive negative tracking is part of the typographic
+  voice.
+- **Use inset shadows (`--ds-shadow-border`) instead of real CSS borders** for crisp
+  1-pixel divisions on Retina. Vercel's "card edge" sharpness depends on this.
+
+### Don't
+
+- **Don't introduce a sixth accent color.** The system runs on text + neutral grays +
+  the four-pair mesh gradient. New accents (a "brand blue", a "secondary purple")
+  flatten the voice instantly.
+- **Don't miniaturize or single-color-reduce the mesh gradient.** It lives at hero
+  scale only. Shrinking it to an icon or solid-fill flattens the brand's only chromatic
+  moment.
+- **Don't render display headlines in all-caps.** Sentence-case + tight tracking is
+  the typographic contract.
+- **Don't promote display weights above 600.** Vercel never goes 700+ for display
+  type. The brand trusts size + tracking to set hierarchy, not heavy ink.
+- **Don't use a single heavy drop-shadow** like `0 4px 8px rgba(0,0,0,0.2)`. Vercel's
+  shadows are stacked small offsets; a single big drop reads as Material, not Geist.
+- **Don't mix the marketing CTA shape with nav-scale radius on the same screen.** Pick
+  6px or 8px and stay consistent within a context.
+- **Don't set body paragraphs in `--font-mono`.** Mono is reserved for code, technical
+  labels, status captions, and eyebrow text — never running prose.
+
+---
+
+## 7. Open Questions
 
 - What are the **actual breakpoint values**? `--text-fluid-*` and `--spacing-fluid-*`
   suggest fluid scaling, not discrete breakpoints — but the layout collapses must
@@ -402,7 +572,7 @@ python scripts/capture_site.py https://vercel.com/ \
 
 ---
 
-## 7. Companion files
+## 8. Companion files
 
 - [x] `design-tokens.json` — structured tokens in W3C DTCG format
       (`$value` / `$type`)

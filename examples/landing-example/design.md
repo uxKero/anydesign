@@ -97,12 +97,25 @@ All values below were extracted from the site's CSS custom properties via
 - `--radius-sm`: 6px (buttons, inputs, badges)
 - `--radius-md`: 16px (cards) — Tailwind's `rounded-2xl` value, confirmed in CSS
 
-### 2.5 Shadows
+### 2.5 Elevation system
 
-- No shadow tokens declared in CSS. The dark surface establishes hierarchy via
-  background elevation (`--color-bg` → `--color-surface-elevated`) rather than shadow.
-- **Confidence**: ⚠️ medium — there could be inline shadows on hover states not visible
-  in the static capture.
+Lumen Notes runs a deliberately **shadow-less elevation system** — depth is established
+by surface tone, not drop-shadow.
+
+| Level | Name | Treatment | Use |
+|---|---|---|---|
+| 0 | Flat | No shadow, no border | Body background (`--color-bg`) |
+| 1 | Surface tint | `background: --color-surface-elevated` (#1E293B) + 1px border `--color-border` | Cards, feature blocks |
+
+No further tiers are declared. The brand's elevation system is explicitly two-tier —
+not because of capture limits but because it's the design choice.
+
+**Confidence**: ⚠️ medium — hover states (which might use shadow) not visible in static capture.
+
+#### Decorative depth (non-functional)
+
+- **No atmospheric gradients, mesh effects, or patterns** observed in the captured
+  surface. The dark canvas does the entire mood work alone.
 
 ### 2.6 Borders
 
@@ -122,7 +135,9 @@ See companion `design-a11y.md`. Summary:
 
 ## 3. Components Inventory
 
-### Button
+### 3.1 Generic components
+
+#### Button
 - **Variants**: primary (solid accent), ghost (transparent + border-strong)
 - **Sizes**: md (40px tall)
 - **Visible states**: default, hover (color shift via `--color-accent-hover`)
@@ -130,7 +145,7 @@ See companion `design-a11y.md`. Summary:
 - **Radius**: 6px (`--radius-sm`)
 - **Confidence**: ✅ high
 
-### Card
+#### Card
 - **Variants**: single — feature card with icon + title + body
 - **Background**: `--color-surface-elevated`
 - **Border**: 1px solid `--color-border`
@@ -138,26 +153,78 @@ See companion `design-a11y.md`. Summary:
 - **Padding**: 32px
 - **Confidence**: ✅ high
 
-### Input
+#### Input
 - **Variants**: single text input (email signup in footer)
 - **Visible states**: empty, focus (2px ring in `--color-border-strong`)
 - **Border**: 1px solid `--color-border`
 - **Confidence**: ⚠️ medium — only one input observed
 
-### Badge
+#### Badge
 - **Variants**: success, warning, danger
 - **Style**: pill (`--radius-sm`), solid background of the relevant semantic color
 - **Confidence**: ⚠️ medium — observed in component examples, not in active marketing copy
+
+### 3.2 Signature components
+
+**No signature components detected** — the synthetic source uses standard UI primitives
+only. A "real" Lumen Notes product surface would likely have signature elements (e.g.,
+a distinctive note-card pattern, a signature command palette), but the captured marketing
+landing operates with generic components only. Don't fabricate signatures that aren't
+there.
 
 ---
 
 ## 4. Layout & Composition
 
+### 4.1 Grid & containers
+
 - **Container max-width**: ~1200px, horizontal padding 24px on desktop
-- **Inferable breakpoints**: ❓ low — only desktop observed; CSS does declare a `--breakpoint-md` token suggesting a 768px breakpoint exists
 - **Vertical rhythm**: sections separated by ~96px (`--space-16` × 1.5)
-- **Composition patterns**: centered hero, 3-column feature grid, footer with sitemap + email capture
-- **Visual hierarchy**: established by typographic size + color contrast (white on dark) rather than oversaturated color
+- **Visual hierarchy**: typographic size + color contrast (white on dark) — no
+  oversaturated color used
+
+### 4.2 Composition patterns
+
+- **Hero**: centered single-column vertical stack
+- **Mid-page**: 3-column feature grid with cards
+- **Footer**: sitemap + email capture, 2-column structure
+
+### 4.3 Responsive behavior
+
+#### Breakpoints
+
+| Name | Width | Key changes |
+|---|---|---|
+| Mobile | < 768px | ❓ low — not captured |
+| Tablet/Desktop | ≥ 768px | ✅ captured (desktop only); 3-up grid renders |
+
+**Confidence**: ❓ low — only desktop captured. CSS declares `--breakpoint-md: 768px`
+and `--breakpoint-lg: 1024px` but their use was not exercised in the captured surface.
+Recommended:
+
+```bash
+python scripts/capture_site.py https://lumen.example/ \
+    --viewports desktop,tablet,mobile
+```
+
+#### Touch targets
+
+- **Buttons**: ~40px tall — just under the WCAG AAA 44px floor on the long edge.
+  If the design needs strict AAA, bump button height to 44px on mobile contexts.
+- **Email input** (footer): height not measurable from static capture.
+
+#### Collapsing strategy
+
+- **3-up feature grid**: expected to collapse to 1-up at mobile — not captured.
+- **Hero**: vertical stack at all breakpoints (no split-hero variant).
+- **Footer**: 2-col structure likely stacks at mobile — not captured.
+
+### 4.4 Image behavior
+
+- **Icons only**: feature cards use small line icons (likely Lucide based on stroke
+  weight). No photography, no decorative graphics observed.
+- **No images at hero scale.** The brand carries its mood through type + color +
+  surface tone alone.
 
 ---
 
@@ -186,16 +253,6 @@ Justification: the CSS class names visible in the HTML (`bg-slate-900`, `text-zi
   carefully to avoid breaking the calm.
 - Card hover state was not observed; the design likely has one. Define before shipping.
 
-### Responsive coverage gotcha
-
-Only the desktop layout was modeled. Before committing breakpoint assumptions, capture
-the site at mobile and tablet viewports:
-
-```bash
-python scripts/capture_site.py https://lumen.example/ \
-    --viewports desktop,tablet,mobile
-```
-
 ### Implicit states to define
 
 - Button hover (visible)
@@ -218,7 +275,41 @@ python scripts/capture_site.py https://lumen.example/ \
 
 ---
 
-## 6. Open Questions
+## 6. Do's and Don'ts
+
+### Do
+
+- **Reserve `--color-accent` (#10B981) for primary CTAs and the brand wordmark.** The
+  emerald accent is the only chromatic moment — using it elsewhere flattens the brand.
+- **Place dark text (`--color-bg`) on the accent button, never white.** Real contrast
+  testing (see `design-a11y.md`) confirms only the dark-on-accent direction reaches AAA.
+- **Use surface tone, not shadow, for elevation.** The shadow-less two-tier system
+  (`--color-bg` → `--color-surface-elevated`) is the brand's depth language.
+- **Set every code/technical label in `--font-mono`.** The mono face is part of the
+  developer-tool positioning.
+- **Use `--radius-sm` (6px) for interactive controls and `--radius-md` (16px) for
+  cards.** The two scales coexist intentionally.
+
+### Don't
+
+- **Don't put white text on the accent button.** Contrast ratio is 2.42:1 — fails all
+  WCAG levels.
+- **Don't introduce a second accent color.** The brand operates on neutrals + one
+  emerald + feedback semantics. New accents flatten the calm.
+- **Don't add drop-shadows to cards.** The system is deliberately shadow-less — drop
+  shadows would break the editorial calm.
+- **Don't override headings with weights above 600.** Display weight ceiling is
+  semibold.
+- **Don't promote secondary text (`--color-text-muted`) to body weight.** The hierarchy
+  is built on tone, not weight.
+
+*Note: this synthetic example only generates 5 of each (vs the typical 7) because the
+captured surface is intentionally minimal. A real product surface would surface more
+rules.*
+
+---
+
+## 7. Open Questions
 
 - Does the product have a dark/light mode toggle? Only dark was observed; no
   `prefers-color-scheme` rules in the captured CSS.
@@ -230,7 +321,7 @@ python scripts/capture_site.py https://lumen.example/ \
 
 ---
 
-## 7. Companion files
+## 8. Companion files
 
 - [x] `design-tokens.json` — structured tokens in W3C DTCG format
       (`$value`/`$type`), ready for Style Dictionary / Figma Variables / Tokens Studio

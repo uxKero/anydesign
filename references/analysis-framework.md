@@ -74,9 +74,25 @@ concrete value.
   `pill` (full-rounded)
 - Detect if there's a system (e.g., "everything uses 8px except buttons at 6px")
 
-**2.5 Shadows and elevation**
-- If shadows exist, note their intensity: none / subtle / medium / strong
-- Is there an inferable elevation system? (sm / md / lg)
+**2.5 Elevation system**
+
+Don't just list "shadow values". Diagnose the elevation system:
+
+- **Identify tiers explicitly**. Name each tier Level 0-N where Level 0 is "flat / no
+  chrome". Each tier carries a treatment (the CSS recipe) and a use case (where it
+  appears).
+- **Detect the brand's elevation philosophy**: stacked shadows (multiple small offsets)?
+  Single drop? Inset border-as-elevation (the Vercel trick)? Flat-only?
+- **If the system uses only one or two tiers, say so** — many brands deliberately avoid
+  heavy elevation. Don't fabricate a 5-tier system that isn't there.
+
+*Sub-section — Decorative depth*: separate atmospheric / non-functional depth cues from
+the UI elevation system. Look for:
+- **Polarity-flipped bands** (light/dark section alternation as depth-by-surface-inversion)
+- **Atmospheric gradients** (hero meshes, ambient color washes — usually scoped to one area)
+- **Background patterns** (dot grids, noise, subtle textures)
+
+These are not "shadows" but they ARE how the brand creates depth. Document them.
 
 **2.6 Borders**
 - Default thickness, color, style
@@ -135,11 +151,33 @@ For each component:
 - Confidence: ✅ high (seen in multiple contexts)
 ```
 
+### Generic vs signature components
+
+Split the inventory into two groups in the output:
+
+- **3.1 Generic components** — standard UI primitives any system would have (Button,
+  Input, Card, Badge, Modal, Toast). Catalog these as above.
+- **3.2 Signature components** — UI patterns that are uniquely this brand's. The "if you
+  see this, you know which product this is" elements. Examples: Vercel's mesh-gradient
+  hero, Linear's command palette, Stripe's gradient code-card, Apple's animated product
+  hero, Anthropic's structured doc blockquote.
+
+For each signature component, capture: what it is, why it's signature (vs a generic
+equivalent), how it's composed (tokens + layered effects), where it appears.
+
+If the design uses only generic patterns and has no distinctive UI motif, **say so
+explicitly**: "No signature components detected — system uses standard UI primitives."
+Don't force one.
+
 ### Common trap
 
 Don't invent variants. If you only saw one button, say "1 variant observed" — don't assume
 "primary, secondary and tertiary" exist because "most design systems have that". Stick to what
 you observed.
+
+Same rule for signature components: if the marketing surface is just a hero + feature
+grid + footer with no distinctive moves, don't invent a "signature card pattern" — the
+honest read is "no signatures detected".
 
 ---
 
@@ -147,23 +185,63 @@ you observed.
 
 **Guiding question:** *How is space organized?*
 
-### What to identify
+This layer has four sub-sections in the output (4.1 Grid & containers, 4.2 Composition
+patterns, 4.3 Responsive behavior, 4.4 Image behavior). Each one is independent — capture
+what you can for each, mark gaps honestly.
+
+### 4.1 Grid & containers
 
 - **Inferable grid**: 12 columns? 16? Other? Detectable container max-width?
-- **Inferable breakpoints**: if the material shows only desktop, note that. If there are
-  responsive versions, detect breakpoints.
 - **Vertical rhythm**: is there consistent spacing between sections?
 - **Visual hierarchy**: how are primaries vs secondaries established? (size, weight, color,
   position, space)
-- **Composition patterns**: hero, feature-grid, alternating sections, card list, sidebar
-  layout, centered single-column, etc.
-- **Density per zone**: are there dense zones (dashboards, tables) and spacious zones (heroes,
-  marketing sections)?
+- **Density per zone**: dense zones (dashboards, tables) vs spacious zones (heroes,
+  marketing sections)
+
+### 4.2 Composition patterns
+
+Name the recognizable patterns: hero, feature-grid, alternating-band sections, card list,
+sidebar layout, centered single-column, split-hero, full-bleed image + offset text, etc.
+
+### 4.3 Responsive behavior
+
+Produce three pieces (each as its own subsection in the output):
+
+- **Breakpoints table**: Mobile / Tablet / Desktop / Wide with width ranges and key
+  layout changes per tier. If you only have desktop material, populate the table with
+  "❓ low confidence — only desktop captured" and recommend the user re-run with
+  `python scripts/capture_site.py <URL> --viewports desktop,tablet,mobile`.
+- **Touch targets**: WCAG asks for ≥ 44×44px on interactive elements. Measure the
+  observable primary CTAs and inputs. Flag anything below.
+- **Collapsing strategy**: per pattern (nav, grid, hero, sidebar), how it adapts. "3-up
+  grid drops to 2-up at tablet, 1-up at mobile" is the level of specificity wanted.
+
+If the CSS contains `clamp()` / fluid values, that's evidence of a fluid (rather than
+discrete-breakpoint) approach — note it.
+
+### 4.4 Image behavior
+
+Categorize images by role and document each:
+
+- **Decorative gradient / mesh / hero asset**: how it's rendered (SVG, canvas, CSS),
+  how it scales, whether it ever tiles or crops
+- **Brand logo strips**: monochrome vs color, height convention, alignment
+- **Product mockups / screenshots**: aspect ratio, treatment (dark mode, browser chrome,
+  device frame)
+- **Photography**: aspect ratios, placeholder treatment (skeleton, blur, dominant color),
+  lazy-load behavior
+- **Icons**: source set if recognizable (Lucide, Heroicons, Phosphor, custom), stroke
+  vs fill convention, size scale
+
+If the source has no images, **say so explicitly** in the output.
 
 ### Common trap
 
 Don't confuse "centered" with "good layout". Note real decisions: does it use asymmetric
 whitespace? Does it align to baseline? Does it have a clear focal point?
+
+Don't invent a 4-tier breakpoint system if you only have desktop. Document what you
+captured; flag the rest.
 
 ---
 
@@ -213,11 +291,67 @@ General summary of how confident you are in each layer:
 
 ---
 
+## Layer 6 — Brand rules (Do's and Don'ts)
+
+**Guiding question:** *What would an AI agent extending this system need to be told
+explicitly so it doesn't drift?*
+
+This layer is **prescriptive and brand-specific**. It's the most useful piece of the
+output for downstream AI builders (v0, Lovable, Cursor) because it codifies the
+"unwritten rules" that tokens alone can't capture.
+
+### Rules of generation
+
+- **Aim for 5-7 Do's and 5-7 Don'ts**. Fewer reads incomplete; more dilutes.
+- **Each rule must be specific to this design**, not generic UX advice. "Use the primary
+  color for primary CTAs" is generic and useless. "Reserve `primary` (#171717) for the
+  conversion target — never as a card background" is specific and useful.
+- **Cite tokens explicitly** wherever possible: `{colors.primary}`, `{space-6x}`,
+  `{typography.display-lg}`. This makes the rules auditable against the token table.
+- **Anchor rules in observation**. Each rule should trace back to something you saw in
+  the source. "Don't promote font weights above 600 for display type" is grounded if you
+  observed all displays at 600. If you didn't observe it, don't claim it.
+
+### Categories to draw rules from
+
+- **Color discipline**: which colors are reserved for which roles? Which combinations are
+  forbidden? How many accents max?
+- **Typography discipline**: weight ceilings, case (sentence vs all-caps), tracking rules,
+  mono-for-code-only rules
+- **Elevation discipline**: stacked vs single-drop, inset borders vs solid borders
+- **Radius/shape discipline**: pill scale vs sharp scale, can they mix?
+- **Spacing discipline**: section rhythm, band alternation patterns
+- **Composition discipline**: hero scale restrictions, decorative element scoping (e.g.,
+  "gradient lives at hero scale only — never miniaturize")
+- **Component composition**: which tokens MUST be used together (e.g.,
+  `button-primary` always pairs `text-on-primary`)
+
+### When to abstain
+
+If the source is shallow (single screenshot of a generic landing) or the system is too
+implicit, you may not have enough evidence for 5-7 of each. In that case write:
+
+> "Insufficient evidence to derive brand-specific usage rules — only the token-level
+> rules captured in Section 2 apply. Re-run with more material (multiple pages, mobile
+> capture, component examples) to extract richer guidance."
+
+Don't pad with generic UX best practices. That breaks the contract.
+
+### Common trap
+
+The temptation is to write Do's that sound smart ("Do maintain hierarchy through scale,
+not color"). Resist this unless you can point to a specific observation that justifies
+it. The best Do's and Don'ts are the ones a careful viewer says "huh, I noticed that
+too" — they're observation made explicit.
+
+---
+
 ## How to use all this
 
-It's not a mechanical checklist. It's a **scaffold** so the analysis doesn't stay shallow. You
-pass through the 5 layers in order, giving more depth to those the material supports and to
-the emphasis the user requested.
+It's not a mechanical checklist. It's a **scaffold** so the analysis doesn't stay shallow.
+You pass through the 6 layers in order, giving more depth to those the material supports
+and to the emphasis the user requested.
 
-If the user said "I want mood/reference", Layer 1 weighs more. If they said "extract tokens",
-Layer 2. If they said "reconstruction", Layer 5. But **all layers are covered**, even briefly.
+If the user said "I want mood/reference", Layer 1 weighs more. If they said "extract
+tokens", Layer 2. If they said "reconstruction", Layers 5-6. But **all layers are
+covered**, even briefly.

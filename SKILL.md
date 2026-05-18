@@ -81,16 +81,17 @@ alternatives instead of inventing content.
 
 ### Step 3 — Layered analysis
 
-Analyze the material in **5 layers**, from general to specific. Full methodology in
+Analyze the material in **6 layers**, from general to specific. Full methodology in
 `references/analysis-framework.md` — consult it when you start the analysis.
 
 | Layer | What to identify |
 |---|---|
 | **1. Identity** | Visual personality, mood, stylistic references, keywords |
-| **2. System** | Tokens: colors (hex + role), typography (families, scale), spacing, radii, shadows |
-| **3. Components** | Inventory: what exists, visible variants, states, hierarchy |
-| **4. Layout** | Grid, inferable breakpoints, vertical rhythm, composition |
+| **2. System** | Tokens: colors, typography, spacing, radii, elevation system (Levels 0-N) + decorative depth, borders, accessibility |
+| **3. Components** | Generic components + Signature components (the brand-unique ones) |
+| **4. Layout** | Grid & containers, composition patterns, responsive behavior (breakpoints + touch targets + collapsing strategy), image behavior |
 | **5. Reconstruction** | Suggested stack, quick wins, tricky bits, confidence map |
+| **6. Brand rules** | Do's and Don'ts — explicit, brand-specific usage rules for downstream AI agents |
 
 To extract tokens with rigor (instead of "green" say "green-500 = #16A34A"), consult
 `references/token-extraction.md`. For accessibility quick-checks on extracted color pairs,
@@ -106,18 +107,21 @@ decorative** — it's the skill's output contract.
 Non-negotiable output rules:
 
 1. **Honesty over confidence.** Every important inference carries a confidence level
-   (✅ high / ⚠️ medium / ❓ low). When in doubt, say so. Inventing tokens is worse than saying
-   "not enough info".
-2. **Real hex codes, not literary approximations.** No "sky blue" — `#3B82F6` with its semantic
-   role.
-3. **Mandatory "Open Questions" section.** List what you couldn't determine and what needs
-   human input. If there are no open questions, justify why.
-4. **Dual output when applicable.** Besides `design.md`, generate `design-tokens.json` in
-   **DTCG format** (`$value`/`$type`) with structured tokens. Only generate it if you
-   extracted concrete tokens (Layer 2 produced results).
-5. **Accessibility report (optional).** If you have at least two color pairs (e.g., text on
-   surface, primary on surface), generate a brief `design-a11y.md` with WCAG ratios. Use
-   `scripts/check_contrast.py` for the math.
+   (✅ high / ⚠️ medium / ❓ low). When in doubt, say so. Inventing tokens is worse than
+   saying "not enough info".
+2. **Real hex codes, not literary approximations.** No "sky blue" — `#3B82F6` with its
+   semantic role.
+3. **Mandatory "Open Questions" section.** List what you couldn't determine and what
+   needs human input. If there are no open questions, justify why.
+4. **Mandatory "Do's and Don'ts" section** (Section 6 of the template). Brand-specific
+   usage rules grounded in observation. If you can't generate at least 3 of each, say
+   so explicitly — never pad with generic UX advice.
+5. **Dual output when applicable.** Besides `design.md`, generate `design-tokens.json`
+   in **DTCG format** (`$value`/`$type`) with structured tokens. Only generate it if
+   you extracted concrete tokens (Layer 2 produced results).
+6. **Accessibility report (optional).** If you have at least two color pairs (e.g., text
+   on surface, primary on surface), generate a brief `design-a11y.md` with WCAG ratios.
+   Use `scripts/check_contrast.py` for the math.
 
 ---
 

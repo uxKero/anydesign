@@ -154,6 +154,8 @@ This is the only path today that gets your captured design system **persistently
 Claude Design — pasting `design.md` as a prompt works for a single project but doesn't
 build the design-system layer.
 
+See [`examples/vercel-landing/claude-design-bundle/`](./examples/vercel-landing/claude-design-bundle) for a real bundle generated from the Vercel run.
+
 ---
 
 ## Installation

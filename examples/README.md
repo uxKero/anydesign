@@ -79,6 +79,26 @@ the robot alone with real alpha, ready to drop into a web.
 - [`element-3D.png`](./discord-hero-asset/element-3D.png) — the scene generated from the prompt
 - [`element-3D-isolated.png`](./discord-hero-asset/element-3D-isolated.png) — the isolated cutout (real alpha)
 
+### [`game-asset-pack/`](./game-asset-pack) — Element mode for game assets
+
+The game-dev use case: **one extraction → N consistent assets**. Element mode
+pointed at the toon key art of a mobile battle-royale extracts the art direction
+once (palette hex by hex, lighting recipe, color-allocation rules like "energy
+green is VFX-only"), then emits a **prompt pack**: a shared style base + three
+isolated asset prompts (original character, pickup, prop) — all transparent-PNG
+game sprites that read as one game.
+
+Downstream proof: the character prompt produced
+[`asset-character.png`](./game-asset-pack/asset-character.png) with real alpha and
+the palette grounding visibly held. IP-safe by design: original subjects sharing
+the style vocabulary, never the source game's characters.
+
+**Files:**
+- [`source.md`](./game-asset-pack/source.md) — capture method + reproduction commands
+- [`element.md`](./game-asset-pack/element.md) — the asset-pack output
+- [`element.png`](./game-asset-pack/element.png) — the captured key art (1440×580)
+- [`asset-character.png`](./game-asset-pack/asset-character.png) — generated character (real alpha)
+
 ### [`v0-downstream-demo/`](./v0-downstream-demo) — Proof that the output flows to v0
 
 A screenshot of a running app at

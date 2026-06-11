@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`examples/game-asset-pack/`** — the game-dev use case for element mode:
+  one extraction → N consistent assets. A toon battle-royale key art becomes a
+  **prompt pack** (shared style base + three isolated asset prompts: original
+  character, pickup, prop), with color-allocation rules captured as consistency
+  notes ("energy green is VFX-only"). Downstream proof: `asset-character.png`
+  generated with real alpha and the palette grounding held. New "Act 4" in the
+  README showcase.
+
+---
+
 ## [0.5.1] — 2026-06-11
 
 ### Added — asset delivery format + asset-path validation

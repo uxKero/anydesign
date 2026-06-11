@@ -84,6 +84,19 @@ real alpha, no scenery. Drop it straight into your site:
 
 <div align="center"><sup>Both prompts + alpha verification in <a href="./examples/discord-hero-asset"><code>examples/discord-hero-asset/</code></a></sup></div>
 
+### Act 4 — Game asset packs that stay consistent
+
+The #1 pain of AI game art is consistency between assets. Element mode extracts a
+game's art direction **once** — palette, lighting recipe, color-allocation rules —
+and emits a prompt pack where every asset shares that base. One key art in, a
+coherent sprite set out:
+
+| Captured key art | Original character generated from the pack |
+|---|---|
+| ![Toon battle-royale key art captured by element mode](./examples/game-asset-pack/element.png) | <p align="center"><img src="./examples/game-asset-pack/asset-character.png" width="240" alt="An original game character generated from the token-grounded asset-pack prompt, transparent PNG"></p> |
+
+<div align="center"><sup>Prompt pack (character + pickup + prop) in <a href="./examples/game-asset-pack"><code>examples/game-asset-pack/</code></a> · original subjects only, per the IP guardrail</sup></div>
+
 ---
 
 ## 🚀 Install

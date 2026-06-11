@@ -170,10 +170,85 @@ def slug(path):
 
 
 # =============================================================================
+# CJK font fallback (issue #3)
+# =============================================================================
+
+# Noto * SC first: available via Google Fonts, so cloud render environments
+# (claude.ai/design) can resolve it; PingFang/Hiragino/YaHei cover local macOS/Windows.
+CJK_FALLBACKS = {
+    "sans-serif": ["Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei"],
+    "serif": ["Noto Serif SC", "Songti SC", "SimSun"],
+    "monospace": ["Noto Sans Mono CJK SC", "PingFang SC"],
+}
+
+CJK_FONT_RE = re.compile(
+    r"noto\s+(sans|serif)\s+(sc|tc|jp|kr)|noto\s+sans\s+mono\s+cjk|pingfang|hiragino\s+sans\s+gb"
+    r"|microsoft\s+(yahei|jhenghei)|source\s+han|simsun|simhei|songti|heiti|wenquanyi|lxgw",
+    re.IGNORECASE,
+)
+
+MONO_HINT_RE = re.compile(r"mono|consolas|menlo|monaco|courier|sfmono", re.IGNORECASE)
+
+
+def split_font_stack(value):
+    """Normalize a DTCG fontFamily $value (string or list) to a list of names."""
+    if isinstance(value, str):
+        return [f.strip() for f in value.split(",") if f.strip()]
+    if isinstance(value, list):
+        return [str(f).strip() for f in value if str(f).strip()]
+    return []
+
+
+def _bare(name):
+    return name.strip().strip("'\"").lower()
+
+
+def classify_font_stack(families):
+    bare = [_bare(f) for f in families]
+    for f in bare:
+        if f in ("monospace", "ui-monospace") or MONO_HINT_RE.search(f):
+            return "monospace"
+    for f in bare:
+        if f in ("serif", "ui-serif"):
+            return "serif"
+    return "sans-serif"
+
+
+def ensure_cjk_fallback(families):
+    """Append a Simplified-Chinese fallback chain to a font stack, keeping the
+    generic family (sans-serif/serif/monospace) last. No-op if the stack
+    already names a CJK font."""
+    if not families:
+        return families
+    if any(CJK_FONT_RE.search(f) for f in families):
+        return list(families)
+    generic = classify_font_stack(families)
+    out = list(families)
+    tail = out.pop() if _bare(out[-1]) == generic else None
+    out += CJK_FALLBACKS[generic]
+    out.append(tail if tail is not None else generic)
+    return out
+
+
+def css_font_name(name):
+    name = name.strip()
+    if name.startswith(("'", '"')) or " " not in name:
+        return name
+    return f'"{name}"'
+
+
+def render_font_family_css(value, cjk_fallback=True):
+    families = split_font_stack(value)
+    if cjk_fallback:
+        families = ensure_cjk_fallback(families)
+    return ", ".join(css_font_name(f) for f in families)
+
+
+# =============================================================================
 # tokens.css
 # =============================================================================
 
-def emit_tokens_css(tokens, out_path, source_name):
+def emit_tokens_css(tokens, out_path, source_name, cjk_fallback=True):
     if not tokens:
         return False
     lines = [
@@ -187,7 +262,10 @@ def emit_tokens_css(tokens, out_path, source_name):
     ]
     for path, value, ttype in walk_tokens(tokens):
         name = "--" + slug(path)
-        rendered = render_css_value(value, ttype)
+        if ttype == "fontFamily":
+            rendered = render_font_family_css(value, cjk_fallback)
+        else:
+            rendered = render_css_value(value, ttype)
         lines.append(f"  {name}: {rendered};")
     lines.append("}")
     lines.append("")
@@ -207,13 +285,13 @@ def render_css_value(value, ttype):
 # tailwind.config.ts
 # =============================================================================
 
-def emit_tailwind_config(tokens, out_path, source_name):
+def emit_tailwind_config(tokens, out_path, source_name, cjk_fallback=True):
     if not tokens:
         return False
 
     color = build_tailwind_colors(tokens.get("color", {}))
     typography = tokens.get("typography", {})
-    font_family = build_tailwind_font_family(typography.get("font-family", {}))
+    font_family = build_tailwind_font_family(typography.get("font-family", {}), cjk_fallback)
     font_size = build_tailwind_scalar_map(typography.get("font-size", {}))
     font_weight = build_tailwind_scalar_map(typography.get("font-weight", {}))
     line_height = build_tailwind_scalar_map(typography.get("line-height", {}))
@@ -305,18 +383,16 @@ def build_tailwind_scalar_map(subtree):
     return out
 
 
-def build_tailwind_font_family(subtree):
+def build_tailwind_font_family(subtree, cjk_fallback=True):
     out = {}
     for key, val in subtree.items():
         if key.startswith("$"):
             continue
         if is_token_leaf(val):
-            v = val["$value"]
-            if isinstance(v, str):
-                families = [f.strip() for f in v.split(",")]
-                out[key] = families
-            else:
-                out[key] = v
+            families = split_font_stack(val["$value"])
+            if cjk_fallback:
+                families = ensure_cjk_fallback(families)
+            out[key] = families
     return out
 
 
@@ -1053,6 +1129,12 @@ def emit_readme(out_dir, source_name, emitted):
         "",
         "- If Claude Design's extracted palette differs from your tokens, re-upload the PPTX first (richest visual context) and use the **Remix** button.",
         "- If colors come through but typography doesn't, the font family in the bundle is a fallback chain — name the exact font in the design-system setup notes.",
+        "- **Chinese (CJK) text renders in the wrong font / shows non-Simplified glyphs:** the cloud render environment may not ship the CJK fonts in the fallback chain. The bundle's font stacks already prioritize `Noto Sans SC` (cloud-friendly) ahead of local-only fonts like `PingFang SC`. To guarantee it, load Noto Sans SC explicitly in the generated HTML `<head>`:",
+        "",
+        "  ```html",
+        '  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">',
+        "  ```",
+        "",
         "- The DTCG `design-tokens.json` from anydesign is the canonical source. If Claude Design ever supports DTCG natively, you can drop it in directly.",
         "",
         "---",
@@ -1081,6 +1163,8 @@ def main():
                         help="Output directory (default: claude-design-bundle)")
     parser.add_argument("--skip", default="",
                         help=f"Comma-separated formats to skip: {','.join(ALL_FORMATS)}")
+    parser.add_argument("--no-cjk-fallback", action="store_true",
+                        help="Don't append the Simplified-Chinese font fallback chain to exported font stacks")
     args = parser.parse_args()
 
     design_path = Path(args.design_md)
@@ -1132,7 +1216,8 @@ def main():
 
     if "css" in formats:
         if tokens:
-            ok = emit_tokens_css(tokens, out_dir / "tokens.css", source_name)
+            ok = emit_tokens_css(tokens, out_dir / "tokens.css", source_name,
+                                 cjk_fallback=not args.no_cjk_fallback)
             print(f"  {'✓' if ok else '✗'} tokens.css")
             if ok:
                 emitted.append("tokens.css")
@@ -1141,7 +1226,8 @@ def main():
 
     if "tailwind" in formats:
         if tokens:
-            ok = emit_tailwind_config(tokens, out_dir / "tailwind.config.ts", source_name)
+            ok = emit_tailwind_config(tokens, out_dir / "tailwind.config.ts", source_name,
+                                      cjk_fallback=not args.no_cjk_fallback)
             print(f"  {'✓' if ok else '✗'} tailwind.config.ts")
             if ok:
                 emitted.append("tailwind.config.ts")

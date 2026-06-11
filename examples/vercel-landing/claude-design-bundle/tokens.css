@@ -101,8 +101,8 @@
   --color-marketing-violet: #7928CA;
   --color-marketing-cyan: #50E3C2;
   --color-marketing-highlight-pink: #FF0080;
-  --typography-font-family-sans: ui-sans-serif, system-ui, sans-serif;
-  --typography-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono';
+  --typography-font-family-sans: ui-sans-serif, system-ui, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --typography-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', "Noto Sans Mono CJK SC", "PingFang SC", monospace;
   --typography-font-weight-thin: 100;
   --typography-font-weight-light: 300;
   --typography-font-weight-normal: 400;

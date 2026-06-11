@@ -34,6 +34,30 @@ any third-party brand. Useful as a minimal reference for the file shape.
 - [`design-tokens.json`](./landing-example/design-tokens.json)
 - [`design-a11y.md`](./landing-example/design-a11y.md)
 
+### [`poolsuite-player-element/`](./poolsuite-player-element) — Element mode on poolsuite.net
+
+First real-world run of **element mode** (v0.5.0). Targets the signature component of
+[poolsuite.net](https://poolsuite.net) — the retro Mac OS player window — via DOM-precise
+capture (`capture_site.py --selector "#component-is-fm"`).
+
+The output is a `hybrid` **`element.md`**: a scoped token spec (pixel-sampled accents,
+the verbatim bevel-shadow system, the `active:invert` signature interaction), a
+ready-to-paste reconstruction prompt for v0/Claude Code, and a **token-grounded
+generative image prompt** for the VHS footage frame the window plays — palette anchored
+to the extracted hexes so the regenerated asset harmonizes with the chrome.
+
+Downstream proof included: the reconstruction prompt pasted into v0 produced
+[retro-radio-player-zz.vercel.app](https://retro-radio-player-zz.vercel.app/) in two
+iterations (the second fixing typographic case discipline — a lesson now baked into
+the skill).
+
+**Files:**
+- [`source.md`](./poolsuite-player-element/source.md) — capture method + reproduction commands
+- [`element.md`](./poolsuite-player-element/element.md) — the element-mode output
+- [`element.png`](./poolsuite-player-element/element.png) — the captured element (607×640)
+- [`element.html`](./poolsuite-player-element/element.html) — the element's outerHTML
+- [`v0-result.png`](./poolsuite-player-element/v0-result.png) — the v0 rebuild
+
 ### [`v0-downstream-demo/`](./v0-downstream-demo) — Proof that the output flows to v0
 
 A screenshot of a running app at

@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] — 2026-06-10
+
+### Added — Element mode ("copy element")
+
+- **New mode that scopes the analysis to ONE visual element** — "copy this navbar",
+  "recreate this 3D illustration", "give me a prompt to regenerate this graphic".
+  Instead of a system-level `design.md`, element mode produces a focused **`element.md`**.
+- **Three element kinds with distinct outputs**:
+  - `code` (navbar, card, button, hero) → scoped token spec + ready-to-paste
+    reconstruction prompt for code agents (v0, Claude Code, Lovable)
+  - `asset` (3D illustrations, mascots, photographic art) → **token-grounded prompt
+    for generative image models**: the prompt embeds the exact extracted palette
+    (hex via `extract_colors.py` / CSS vars / Figma fills), observed lighting,
+    composition, and the parent brand's mood — plus negative cues and per-model
+    adaptation notes (gpt-image/DALL-E, Midjourney, Stable Diffusion/Flux)
+  - `hybrid` (a code container embedding art) → code spec + nested asset prompt(s)
+- **`references/element-copy.md`** — the new reference: classification heuristic,
+  element-scoped capture flows, the full `element.md` template (YAML frontmatter +
+  prose, `anydesign-element-1` schema), structured canonical prompt format
+  (SUBJECT / STYLE / COMPOSITION / LIGHTING / PALETTE / MOOD / INTEGRATION / AVOID),
+  and element-mode quality rules — including an IP guardrail for brand-identifying
+  artwork and a mandatory prompt-fidelity honesty note.
+- **`--selector` flag in `scripts/capture_site.py`** — DOM-precise element capture:
+  screenshots only the first matching element's bounding box and saves its
+  `outerHTML` instead of the full page. Composes with `--viewports`. Clear error
+  (exit 1) when the selector matches nothing visible. Tested live against
+  vercel.com's header (1440×64 crop + outerHTML).
+- SKILL.md: new "Two modes" routing section (full vs element, with activation
+  signals and ambiguity rule), element-mode trigger phrases in the skill
+  description, updated scripts table and structure tree.
+- README: new "Copy a single element (element mode)" section, element use case,
+  and updated script docs.
+- **`examples/poolsuite-player-element/`** — first real-world element-mode run:
+  the retro Mac OS player window of poolsuite.net, captured via
+  `--selector "#component-is-fm"` (607×640 + outerHTML). The `element.md` is a
+  `hybrid`: scoped spec (pixel-sampled accents, verbatim bevel shadows, the
+  `active:invert` signature interaction), v0-ready reconstruction prompt, and a
+  token-grounded VHS-still image prompt. Downstream proof: the prompt pasted into
+  v0 produced a live rebuild at
+  [retro-radio-player-zz.vercel.app](https://retro-radio-player-zz.vercel.app/)
+  in two iterations — the second fixing typographic case discipline, a lesson
+  fed back into `element-copy.md` as a first-class capture rule.
+
+### Notes
+
+- `lint_design_md.py` validates the full `design.md` contract only — it does not
+  apply to `element.md`.
+- Element mode delivers the **prompt**, never the rendered image — generation stays
+  in the user's image model of choice.
+
+---
+
 ## [0.4.0] — 2026-05-19
 
 ### Added — Claude Design bridge

@@ -20,6 +20,14 @@ Multi-viewport capture (for responsive analysis):
 Scroll capture (for lazy-loaded content):
     python capture_site.py https://example.com --scroll-capture
 
+Element capture (for element mode — screenshots one element only):
+    python capture_site.py https://example.com \\
+        --selector "header.navbar" \\
+        --output ./element.png
+
+    With --selector, the screenshot covers only the element's bounding box and
+    the saved HTML is the element's outerHTML instead of the full page.
+
 Skip rendered-HTML output:
     python capture_site.py https://example.com --no-save-html
 
@@ -192,6 +200,7 @@ def capture_one(
     save_html=True,
     dismiss_cookies=True,
     scroll_capture=False,
+    selector=None,
     user_agent=DEFAULT_USER_AGENT,
     wait_until="networkidle",
     timeout=30000,
@@ -230,14 +239,42 @@ def capture_one(
             print("   Scrolling to trigger lazy content...")
             scroll_through_page(page)
 
-        page.screenshot(path=str(output_path), full_page=True)
-        print(f"   Screenshot saved: {output_path}")
+        if selector:
+            locator = page.locator(selector).first
+            try:
+                locator.wait_for(state="visible", timeout=10000)
+            except Exception:
+                browser.close()
+                raise RuntimeError(
+                    f"Selector matched nothing visible: {selector!r}. "
+                    "Try a broader selector, or capture without --selector and "
+                    "analyze the element region visually."
+                )
+            locator.scroll_into_view_if_needed()
+            page.wait_for_timeout(300)
+            box = locator.bounding_box()
+            if box:
+                print(
+                    f"   Element box: {int(box['width'])}x{int(box['height'])} "
+                    f"at ({int(box['x'])}, {int(box['y'])})"
+                )
+            locator.screenshot(path=str(output_path))
+            print(f"   Element screenshot saved: {output_path}")
 
-        if save_html:
-            html_path = output_path.with_suffix(".html")
-            html_content = page.content()
-            html_path.write_text(html_content, encoding="utf-8")
-            print(f"   Rendered HTML saved: {html_path}")
+            if save_html:
+                html_path = output_path.with_suffix(".html")
+                outer_html = locator.evaluate("el => el.outerHTML")
+                html_path.write_text(outer_html, encoding="utf-8")
+                print(f"   Element outerHTML saved: {html_path}")
+        else:
+            page.screenshot(path=str(output_path), full_page=True)
+            print(f"   Screenshot saved: {output_path}")
+
+            if save_html:
+                html_path = output_path.with_suffix(".html")
+                html_content = page.content()
+                html_path.write_text(html_content, encoding="utf-8")
+                print(f"   Rendered HTML saved: {html_path}")
 
         try:
             title = page.title()
@@ -301,6 +338,13 @@ def main():
         help="Disable the cookie/consent banner auto-dismiss attempt.",
     )
     parser.add_argument(
+        "--selector",
+        default=None,
+        help="CSS selector for element capture: screenshot only the first matching "
+             "element's bounding box and save its outerHTML instead of the full page. "
+             "Used by element mode ('copy element').",
+    )
+    parser.add_argument(
         "--scroll-capture",
         action="store_true",
         help="Scroll through the page (25%%/50%%/75%%/100%%) before screenshot to "
@@ -350,6 +394,7 @@ def main():
                 save_html=args.save_html,
                 dismiss_cookies=args.dismiss_cookies,
                 scroll_capture=args.scroll_capture,
+                selector=args.selector,
                 user_agent=args.user_agent,
                 wait_until=args.wait_until,
                 timeout=args.timeout,

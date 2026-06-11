@@ -1,6 +1,6 @@
 ---
 name: anydesign
-description: "Analyze images, websites, and Figma files to extract their design and generate a `design.md` with token system, component inventory, and reconstruction notes. Use this skill whenever the user wants to understand, document, replicate, or audit the design of something visual: a screenshot, a URL, a Figma link, a Pinterest reference, a mockup, a competitor's site, a component, a dashboard, a landing page. Also when they ask 'extract the design system from X', 'document the style of Y', 'analyze this visually', 'convert this image into tokens', 'help me replicate this design', 'what palette does this site use', 'how is this built'. If the user brings any visual source and wants to understand it at a design level — this skill should activate."
+description: "Analyze images, websites, and Figma files to extract their design and generate a `design.md` with token system, component inventory, and reconstruction notes. Use this skill whenever the user wants to understand, document, replicate, or audit the design of something visual: a screenshot, a URL, a Figma link, a Pinterest reference, a mockup, a competitor's site, a component, a dashboard, a landing page. Also when they ask 'extract the design system from X', 'document the style of Y', 'analyze this visually', 'convert this image into tokens', 'help me replicate this design', 'what palette does this site use', 'how is this built'. Also for single elements: 'copy this navbar', 'recreate this illustration', 'give me a prompt to regenerate this graphic' — element mode outputs a focused element.md, with token-grounded image-model prompts when the element is visual art. If the user brings any visual source and wants to understand it at a design level — this skill should activate."
 ---
 
 # AnyDesign — Design analysis and documentation skill
@@ -33,6 +33,26 @@ The skill supports three input types. Each has its own flow:
 
 If the user passes multiple sources at once (e.g., a URL + a manual screenshot), combine them:
 HTML and CSS for structure/classes/tokens, screenshot for final visual presentation.
+
+---
+
+## Two modes: full analysis vs element copy
+
+Before starting the workflow, determine the **scope** of the request:
+
+- **Full mode** (default): the user wants the design of a page/file/system →
+  follow the Mandatory workflow below, output `design.md`.
+- **Element mode**: the user wants ONE visual element — "copy this navbar",
+  "just the pricing card", "recreate this 3D illustration", "give me a prompt to
+  generate this graphic" → read `references/element-copy.md` and follow its E-steps,
+  output `element.md`. Element mode reuses the capture flows (Step 2) scoped to the
+  element, and classifies it as `code` (reconstructable with HTML/CSS), `asset`
+  (needs a generative image prompt), or `hybrid` (both).
+
+Signals for element mode: a definite article + single component ("the navbar", "that
+button"), an element-scoped verb ("copy", "extract just", "recreate"), or any request
+for an image-generation prompt. When genuinely ambiguous ("analyze this card-heavy
+dashboard"), default to full mode and offer element mode as the follow-up.
 
 ---
 
@@ -173,7 +193,7 @@ when they help.
 
 | Script | When to run | Dependencies |
 |---|---|---|
-| `capture_site.py` | URL whose raw HTML is empty (SPA), or when responsive analysis needs multiple viewports | `playwright` |
+| `capture_site.py` | URL whose raw HTML is empty (SPA), when responsive analysis needs multiple viewports, or element mode on a URL (`--selector` screenshots one element + saves its outerHTML) | `playwright` |
 | `extract_css_vars.py` | URL with linked stylesheets — pulls `--*` custom properties as explicit tokens | stdlib only |
 | `extract_colors.py` | Local image where vision approximation isn't precise enough; returns dominant hex codes with area % | `Pillow` |
 | `check_contrast.py` | Any time you have extracted color pairs — emits a WCAG contrast table | stdlib only |
@@ -208,7 +228,8 @@ anydesign/
 │   ├── capture-flows.md           (how to capture each source type)
 │   ├── analysis-framework.md      (the 5 analysis layers in detail)
 │   ├── token-extraction.md        (how to infer tokens with rigor)
-│   └── output-template.md         (design.md template)
+│   ├── output-template.md         (design.md template)
+│   └── element-copy.md            (element mode: element.md template + image prompts)
 ├── scripts/
 │   ├── capture_site.py            (multi-viewport Playwright capture)
 │   ├── extract_css_vars.py        (CSS custom properties extractor)

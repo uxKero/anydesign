@@ -126,6 +126,15 @@ python scripts/capture_site.py <URL> --scroll-capture
 Scrolls through 25%/50%/75% of the page before the screenshot to trigger intersection-observer
 content.
 
+**Element capture** (element mode only — see `references/element-copy.md`):
+
+```bash
+python scripts/capture_site.py <URL> --selector "header.navbar" --output ./element.png
+```
+
+Screenshots only the first matching element's bounding box and saves its outerHTML
+instead of the full page.
+
 Then analyze the screenshots as images (Flow 1) plus the rendered HTML.
 
 **Important user warning:** the first time Playwright runs, it downloads ~300MB of Chromium.

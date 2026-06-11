@@ -129,8 +129,8 @@ const config: Config = {
         }
       },
       fontFamily: {
-        "sans": ["ui-sans-serif", "system-ui", "sans-serif"],
-        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "'Liberation Mono'"]
+        "sans": ["ui-sans-serif", "system-ui", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "sans-serif"],
+        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "'Liberation Mono'", "Noto Sans Mono CJK SC", "PingFang SC", "monospace"]
       },
       fontSize: {
         "xs": "0.75rem",

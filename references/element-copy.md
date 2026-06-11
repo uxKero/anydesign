@@ -89,6 +89,39 @@ Use the template below. Then deliver per Step 5 of the main workflow.
 `lint_design_md.py` does **not** apply to `element.md` — it validates the full
 `design.md` contract only.
 
+**Delivery format (asset/hybrid kinds).** Before writing the image prompt, determine
+how the user will USE the asset — it changes the BACKGROUND/INTEGRATION block:
+
+| Format | When | Prompt consequence |
+|---|---|---|
+| `scene` | Regenerating the composition/mood (hero art, full illustration) | Background baked in, edges blend into the destination surface tone |
+| `isolated` | Dropping the asset into their own web/design (most common) | **Single subject, transparent background (PNG with alpha)**, generous margin, no cast shadow on the ground unless requested |
+
+If the user says "for my website", "as a PNG", "to place over X", default to
+`isolated`. If ambiguous, generate the scene prompt and include the isolated variant
+as a one-line alternative.
+
+**Isolated prompts have two failure modes — write them defensively:**
+
+1. **Prose transparency is unreliable.** Chat UIs frequently ignore "transparent
+   background" written in the prompt and paint a backdrop anyway; the dependable
+   route is the API parameter (gpt-image: `background: "transparent"`). Midjourney
+   has no true alpha at all; SD/Flux varies by pipeline.
+2. **Style worlds summon backdrops and cast.** Atmosphere words ("ambient fill",
+   "night mood", color-named light) make the model paint that atmosphere, and
+   style vocabularies that imply a universe make it add extra characters/props.
+
+So in an `isolated` prompt: lead with the isolation directive ("an isolated asset
+on a fully transparent background: one single X — nothing else in the frame, no
+scenery, no other characters, no props, no floor, no ground shadow"), strip all
+world/atmosphere words (keep lighting neutral: "soft studio key"), and close the
+AVOID block with "no background of any kind".
+
+**Reliable fallback** when transparency still fails: prompt the subject on a solid
+flat chroma background in a color absent from the PALETTE (e.g. pure #00FF00,
+"perfectly uniform, no gradient, no vignette"), then chroma-key it to alpha in
+post (Pillow tolerance-based removal works well on matte renders).
+
 ---
 
 ## The `element.md` template
@@ -174,8 +207,10 @@ LIGHTING: [key direction, softness, color cast — "single soft key from upper l
 PALETTE: [exact hexes from the frontmatter palette, with roles —
   "#5B6CFF dominant body, #F2B8FF rim highlights, on #0E0E10 background"]
 MOOD: [3-5 adjectives consistent with the parent brand voice]
-BACKGROUND / INTEGRATION: [transparent? flat color matching the parent surface token?
-  must sit on {colors.surface} without a visible box]
+BACKGROUND / INTEGRATION: [delivery format — `scene`: background baked in, edges
+  blending into the destination surface tone; or `isolated`: single subject on a
+  transparent background (PNG with alpha), generous margin, ready to place over
+  {colors.surface}]
 AVOID: [negative cues — "no text, no watermark, no extra objects, no photorealistic
   skin texture, no heavy drop shadow"]
 
@@ -232,6 +267,8 @@ state what must be re-tokenized (e.g., "swap #5B6CFF for the destination's prima
 - ✅ Carry the parent brand voice into MOOD — the prompt should regenerate an asset that
   *belongs* to the source design, not a generic pretty image
 - ✅ Capture the integration contract (what surface it sits on, transparent vs flat bg)
+- ✅ Resolve the **delivery format** (`scene` vs `isolated`/transparent PNG) from the
+  user's goal — "for my website" means isolated cutout, not a recomposed scene
 - ✅ Keep the canonical prompt model-agnostic; adapt per-model only in the notes
 - ✅ Apply confidence markers to the prompt itself — and always include the prompt
   fidelity note

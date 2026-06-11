@@ -58,6 +58,27 @@ the skill).
 - [`element.html`](./poolsuite-player-element/element.html) — the element's outerHTML
 - [`v0-result.png`](./poolsuite-player-element/v0-result.png) — the v0 rebuild
 
+### [`discord-hero-asset/`](./discord-hero-asset) — Element mode, `asset` kind
+
+Validation of element mode's **asset path**: the target is visual art (discord.com's
+clay-style 3D hero scene), so the `element.md` contains a **token-grounded generative
+image prompt** instead of a code spec — palette locked hex by hex to the extracted
+crop, plus an `isolated` variant (transparent PNG) for web-ready cutouts.
+
+Downstream proof for **both delivery formats**: the scene prompt produced
+[`element-3D.png`](./discord-hero-asset/element-3D.png) **first pass** — indigo world
+held, accents landed on the extracted hexes, the scarce pink stayed scoped to the
+screen UI, and the IP guardrail kept the characters original. The `isolated` variant
+produced [`element-3D-isolated.png`](./discord-hero-asset/element-3D-isolated.png) —
+the robot alone with real alpha, ready to drop into a web.
+
+**Files:**
+- [`source.md`](./discord-hero-asset/source.md) — capture method + reproduction commands
+- [`element.md`](./discord-hero-asset/element.md) — the asset-kind output
+- [`element.png`](./discord-hero-asset/element.png) — the captured element (774×526)
+- [`element-3D.png`](./discord-hero-asset/element-3D.png) — the scene generated from the prompt
+- [`element-3D-isolated.png`](./discord-hero-asset/element-3D-isolated.png) — the isolated cutout (real alpha)
+
 ### [`v0-downstream-demo/`](./v0-downstream-demo) — Proof that the output flows to v0
 
 A screenshot of a running app at

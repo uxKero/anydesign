@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.1] — 2026-06-11
+
+### Added — asset delivery format + asset-path validation
+
+- **Delivery format for `asset`/`hybrid` prompts** in `references/element-copy.md`:
+  `scene` (background baked in, edges blending into the destination surface) vs
+  `isolated` (single subject on a **transparent background / PNG with alpha**,
+  generous margin — for dropping the asset into a web). Defaults to `isolated` when
+  the user's goal is placement ("for my website", "as a PNG"). Per-model
+  transparency notes: gpt-image native (`background: "transparent"`), Midjourney
+  flat-bg + removal, SD/Flux flat-bg + removal.
+- **Defensive isolated-prompt rules**, learned from a real failure: prose requests
+  for transparency are unreliable in chat UIs, and style worlds summon backdrops
+  and extra characters. Isolated prompts now lead with the isolation directive,
+  strip world/atmosphere words, keep lighting neutral, and close with "no
+  background of any kind" — with a chroma-key fallback documented for models
+  without true alpha.
+- **`examples/discord-hero-asset/`** — validation of the asset path with proof for
+  **both delivery formats**: discord.com's clay-style 3D hero scene →
+  token-grounded image prompt → `element-3D.png` (scene, **first pass**: indigo
+  ramp held, accents on the extracted hexes, scarce pink scoped to the screen UI,
+  original characters per the IP guardrail) and `element-3D-isolated.png`
+  (isolated cutout with verified real alpha — 65% transparent / 22% opaque / 13%
+  antialiased edges).
+
+---
+
 ## [0.5.0] — 2026-06-10
 
 ### Added — Element mode ("copy element")

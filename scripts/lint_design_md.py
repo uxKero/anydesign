@@ -90,7 +90,7 @@ def extract_yaml_structure(frontmatter):
 
         if indent == 0:
             top_level[key] = val if val else None
-            if key in ("colors", "typography", "spacing", "rounded", "components"):
+            if not val:
                 current_category = key
                 tokens[current_category] = set()
             else:

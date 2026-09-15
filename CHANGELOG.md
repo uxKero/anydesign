@@ -7,7 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [0.6.0] - 2026-09-14
+
+### Changed: token budget
+
+Measured on the same run (analyze vercel.com, Claude Sonnet 5, headless Claude Code):
+
+| | 0.5.1 | scripts only | + merged references |
+|---|---|---|---|
+| Model calls | 51 | 31 | **16** |
+| Peak context | 209k | 143k | **89k** |
+| Cache reads | 6.54M | 3.36M | **1.08M** |
+| Output tokens | 49.8k | 36.9k | **13.5k** |
+| API-equivalent cost | USD 2.55 | USD 1.52 | **USD 0.61** (-76%) |
+| Wall time | 11.8 min | 7.6 min | **3.1 min** |
+
+The latest design.md passes lint 6/6 and is more exact than the 0.5.1 one: typography
+comes from computed styles (heading weight 450, tracking -3.84px) instead of estimates.
+
+- **`references/design-md.md` replaces `analysis-framework.md`, `output-template.md` and
+  `token-extraction.md`** (12.8k tokens → 2.8k). The six layers, token rigor, the
+  frontmatter and section contract, and the art direction QA pass now live in one place
+  without repeating each other. The QA pass runs before writing and is not written out.
+- **Standard vs deep depth.** Every section stays, with length caps by default (brand voice
+  in one paragraph, up to 6 generic components, 5 Do's and 5 Don'ts). Deep doubles the caps
+  and is used only when asked for.
+- **SKILL.md rewritten** (3.0k → 1.5k tokens) with a shorter description (211 → 79 tokens),
+  so it costs less in every conversation and fits Codex's skill-list budget.
+- **`lint_design_md.py` accepts any frontmatter group**, so refs like `{shadows.card}` no
+  longer fail and trigger fix loops.
+- **`extract_css_vars.py` prints a digest instead of the dump.** Real sites produce
+  15k-55k tokens of variables; the digest collapses scales to one line, resolves `var()`
+  aliases, hides framework plumbing and caps at `--budget` (default 6000 chars, about
+  2.5k tokens). The full JSON is still written to disk, and `--grep REGEX` searches it
+  without refetching. `--json` keeps the old stdout behavior. Variables are now
+  categorized by value as well as name, and BEM selectors (`block--modifier`) are no
+  longer mistaken for variables.
+- **`capture_site.py` saves readable frames and prints computed styles.** The default
+  is now up to 4 viewport-sized frames per viewport (`--frames N`) instead of one
+  full-page PNG that vision models downscale into illegibility, plus the computed
+  styles of body, headings, links, buttons, inputs, header and cards read from the live
+  DOM. `--full-page` restores the old capture. Rendered HTML is no longer saved by
+  default for pages (`--save-html` to opt in); element mode still saves its outerHTML.
+- **New `build_tokens_json.py`** writes `design-tokens.json` (DTCG) from the design.md
+  frontmatter plus the role and confidence columns of the Section 2 tables, so the model
+  no longer types the same tokens a third time. Output stays compatible with
+  `export_for_claude_design.py`. Frontmatter accepts optional `shadows` and `motion`.
+- **`check_contrast.py --output`** also prints one summary line per pair, so the report
+  is written by the script and quoted, not retyped.
+- **SKILL.md gains a "Token budget" section**: run scripts without reading their source,
+  never read dumps whole, cap images, batch small checks, generate derived files, write
+  design.md once and fix lint findings with small edits.
 
 ### Added
 

@@ -9,7 +9,7 @@ machine-readable design specs — and copies **single elements** (navbars to 3D 
 as rebuild prompts any AI can execute.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Skill Version](https://img.shields.io/badge/version-0.5.1-blue.svg)](./CHANGELOG.md)
+[![Skill Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](./CHANGELOG.md)
 [![Claude Skill](https://img.shields.io/badge/Claude-Skill-purple.svg)](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
 [![DTCG](https://img.shields.io/badge/Design%20Tokens-DTCG-green.svg)](https://www.designtokens.org/)
 [![GitHub stars](https://img.shields.io/github/stars/uxKero/anydesign?style=flat&color=orange)](https://github.com/uxKero/anydesign/stargazers)
@@ -176,15 +176,16 @@ The deliverable is plain text. Anything that reads Markdown can use it.
 
 ## 🧰 Standalone CLI scripts
 
-Seven pure-Python tools in [`scripts/`](./scripts) that **work without Claude**:
+Eight pure-Python tools in [`scripts/`](./scripts) that **work without Claude**:
 
 | Script | What it does | Deps |
 |---|---|---|
-| `extract_css_vars.py` | Pull every `--*` custom property from a URL's stylesheets, grouped by category | stdlib |
-| `capture_site.py` | Playwright captures: multi-viewport, cookie-banner dismiss, scroll-capture, single-element (`--selector`) | `playwright` |
+| `extract_css_vars.py` | Pull every `--*` custom property from a URL's stylesheets: compact digest on screen, full JSON on disk | stdlib |
+| `capture_site.py` | Playwright captures: computed styles of typical elements, readable viewport frames, multi-viewport, cookie-banner dismiss, single-element (`--selector`) | `playwright` |
 | `extract_colors.py` | Dominant colors from an image, with area % | `Pillow` |
 | `check_contrast.py` | WCAG 2.1 contrast table for color pairs | stdlib |
 | `lint_design_md.py` | Validate a `design.md` against the spec | stdlib |
+| `build_tokens_json.py` | Generate `design-tokens.json` (DTCG) from a `design.md` | stdlib |
 | `verify_design.py` | **Drift audit**: compare a `design-tokens.json` against the live URL — is your spec still true? | stdlib |
 | `export_for_claude_design.py` | Bundle tokens into PPTX/DOCX/CSS/Tailwind for [claude.ai/design](https://claude.ai/design) | `pyyaml`, `python-pptx`, `python-docx` |
 
@@ -193,19 +194,20 @@ Seven pure-Python tools in [`scripts/`](./scripts) that **work without Claude**:
 
 ```bash
 # Pull design tokens from any URL — no Claude needed
-python scripts/extract_css_vars.py https://vercel.com/ --pretty
+python scripts/extract_css_vars.py https://vercel.com/
 
-# Multi-viewport responsive captures
-python scripts/capture_site.py https://your-site.com --viewports desktop,tablet,mobile
+# Computed styles + readable frames, desktop and mobile
+python scripts/capture_site.py https://your-site.com --viewports desktop,mobile
 
 # Capture a single element (screenshot + outerHTML)
 python scripts/capture_site.py https://your-site.com --selector "header.navbar" -o element.png
 
 # WCAG contrast check
-python scripts/check_contrast.py --pair "#111,#FFF" --pair "#3B82F6,#FFF"
+python scripts/check_contrast.py --pair "#111,#FFF" --pair "#3B82F6,#FFF" --output design-a11y.md
 
-# Validate a generated design.md
+# Validate a generated design.md, then derive its DTCG token file
 python scripts/lint_design_md.py path/to/design.md
+python scripts/build_tokens_json.py path/to/design.md
 
 # Audit declared tokens vs live site (the drift tool)
 python scripts/verify_design.py path/to/design-tokens.json https://vercel.com/
@@ -295,12 +297,10 @@ without passing through "system" — that's what makes the output coherent.
 anydesign/
 ├── SKILL.md                       Main instructions (the "brain")
 ├── references/                    Loaded on-demand (progressive disclosure)
-│   ├── capture-flows.md           How to capture each source type
-│   ├── analysis-framework.md      The analysis layers in detail
-│   ├── token-extraction.md        Token inference rigor + DTCG
-│   ├── output-template.md         design.md template
+│   ├── capture-flows.md           Capture flags and edge cases per source type
+│   ├── design-md.md               Analysis layers, token rigor and the design.md contract
 │   └── element-copy.md            Element mode: element.md + image prompts
-├── scripts/                       7 standalone CLI tools
+├── scripts/                       8 standalone CLI tools
 └── examples/                      Real, reproducible runs
     ├── vercel-landing/            Full analysis of vercel.com (+ Claude Design bundle)
     ├── landing-example/           Synthetic minimal example

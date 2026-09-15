@@ -209,7 +209,13 @@ def main():
         out_path = Path(args.output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(output, encoding="utf-8")
-        print(f"Wrote {len(results)} pair(s) to {out_path}", file=sys.stderr)
+        print(f"Wrote {len(results)} pair(s) to {out_path}")
+        for r in results:
+            g = r["grades"]
+            level = "AAA" if g["AAA_normal"] else "AA" if g["AA_normal"] else \
+                "AA large only" if g["AA_large"] else "fails AA"
+            label = r["label"] or f"{r['fg']} on {r['bg']}"
+            print(f"  {label}: {r['ratio']}:1 {level}")
     else:
         print(output)
 

@@ -30,115 +30,77 @@ Step 2 of the main workflow.
 
 **Typical input:** a URL pasted by the user.
 
-**Strategy: HTML first, CSS variables second, screenshot only if needed.**
+**Strategy: scripts first, and only their digests enter the context.** Raw HTML of a
+marketing site is 200k to 570k tokens, and its full CSS variable dump 15k to 55k. Neither
+is ever read whole.
 
-### Step 2.1 — Fetch the HTML
-
-Use the `WebFetch` tool with the URL. This retrieves raw HTML without executing JavaScript.
-
-Review the HTML for signs of **real content**:
-
-✅ **Good HTML (sufficient, no screenshot needed):**
-- Has visible text in `<h1>`, `<p>`, `<button>`, etc.
-- Has descriptive CSS classes on elements
-- Has semantic structure (`<header>`, `<main>`, `<section>`)
-- Links stylesheets you can inspect
-- Typically: blogs, static landings, sites with SSR (Next.js/Astro/Hugo)
-
-❌ **Empty HTML (Playwright screenshot needed):**
-- `<body>` is nearly empty, just `<div id="root"></div>` or similar
-- Visible content is minimal or only placeholders
-- Many scripts but little text
-- Typically: SPAs without SSR (pure React/Vue), dashboards, web apps
-
-### Step 2.2 — If HTML is sufficient
-
-Work with it. Look specifically for:
-- **CSS classes** that suggest a framework: `bg-blue-500` (Tailwind), `MuiButton-root`
-  (Material UI), `chakra-button` (Chakra), `ant-btn` (Ant Design), `sl-button` (Shoelace)
-- **Inline `<style>` blocks** with `--*: value;` definitions
-- **Linked stylesheets** (`<link rel="stylesheet" href="...">`) — see Step 2.2.bis below
-- **Meta tags** with brand info: `<meta property="og:image">`, theme-color, etc.
-
-### Step 2.2.bis — CSS variables extraction (this is where the gold is)
-
-CSS custom properties (e.g., `--color-primary: #3B82F6;`) are the **explicit token system**
-of the site. Extracting them turns guesswork into ground truth and gives you ✅ high
-confidence tokens directly.
-
-**Two ways to do it:**
-
-**A. Batch via the helper script (preferred for multi-stylesheet sites):**
+### Step 2.1: explicit tokens from CSS custom properties
 
 ```bash
-python scripts/extract_css_vars.py <URL> --output ./css-vars.json
+python scripts/extract_css_vars.py <URL>
 ```
 
-This fetches the HTML, discovers every `<link rel="stylesheet">` and inline `<style>` block,
-downloads them, and extracts all `--name: value;` definitions grouped by inferred category
-(color / spacing / typography / radius / other). Stdlib only — no pip install required.
+Fetches the HTML, every linked stylesheet and inline `<style>` block, and prints a digest:
+numeric scales collapsed to one line each (`--ds-gray-*: 100=#f2f2f2 200=#ebebeb ...`),
+`var()` aliases resolved to their final value, theme redefinitions flagged, framework
+plumbing (`--tw-*` and similar) hidden, capped at `--budget` characters (default 6000,
+about 2-3k tokens). The full JSON goes to `./css-vars.json`. When a value you need is
+not in the digest, search it without refetching and without writing code:
 
-**B. Manual via WebFetch (when you only have one or two stylesheets and want fine control):**
-
-1. Parse the HTML response for `<link rel="stylesheet" href="...">`.
-2. For each href (resolving relative URLs against the base), call `WebFetch` with a prompt
-   like *"Return only the CSS custom property definitions — lines containing `--*: value;`"*.
-3. Manually map each variable to its semantic role for the token table.
+```bash
+python scripts/extract_css_vars.py --grep 'border|radius|shadow'
+```
 
 **What to do with the extracted variables:**
-- They go into the `design-tokens.json` with **`"confidence": "high"`** because they're
-  authoritative — the designer/developer named them explicitly.
-- Cite the source stylesheet URL in the `_meta` section of the JSON.
-- In `design.md` Section 2 (Design System), mark these tokens with ✅.
+- They are the site's **explicit token system**: mark them ✅ high confidence in
+  Section 2, and cite the stylesheet source in the Source section.
+- Map them to semantic roles (`--ds-gray-1000` → `text-primary`) in the frontmatter.
 
-### Step 2.3 — If HTML is empty: on-demand Playwright
-
-Execute the script:
+### Step 2.2: rendered styles and frames
 
 ```bash
-python scripts/capture_site.py <URL> --output ./capture.png
+python scripts/capture_site.py <URL> --viewports desktop,mobile
 ```
 
-By default the script:
-1. Verifies Playwright is installed; if not, prints the exact install command.
-2. Renders the site in a headless Chromium.
-3. **Attempts to dismiss cookie/consent banners** via a list of common selectors
-   (silently fails if none match).
-4. Takes a full-page screenshot.
-5. **Saves the post-JavaScript rendered HTML** alongside (use `--no-save-html` to opt out).
+Renders the page in headless Chromium, dismisses common cookie banners, then:
 
-**Multi-viewport** (for responsive analysis — Layer 4 of the framework needs this):
+1. **Prints computed styles** of body, h1-h3, paragraphs, links, buttons, inputs, header
+   and cards: font family, size, weight, line-height, letter-spacing, color, background,
+   radius, padding, border and shadow, read from the live DOM. These are real values:
+   they give typography and component tokens without reading any HTML.
+2. **Saves up to 4 viewport-sized frames per viewport**, spread from top to bottom
+   (`capture-desktop-01.png` ... `capture-mobile-04.png`). Scrolling to each frame also
+   triggers lazy content.
 
-```bash
-python scripts/capture_site.py <URL> --viewports desktop,tablet,mobile
-```
+Read only the frames you need: normally the first desktop frame for identity and hero,
+one or two more for sections and components, and one mobile frame for responsive notes.
+**Never write your own capture or scroll scripts.** Options that cover the usual needs:
 
-Produces `capture-desktop.png`, `capture-tablet.png`, `capture-mobile.png` with sensible
-default sizes (1440×900, 768×1024, 375×812). Pair this with the rendered HTML to give the
-analysis layer responsive evidence.
+- `--frames 2` or `--frames 6`: fewer or more frames
+- `--viewports desktop,tablet,mobile`: responsive analysis (Layer 4)
+- `--full-page`: the old single tall PNG; unreadable once downscaled on long pages
+- `--save-html`: keep the rendered HTML to `grep` for class names (framework signals)
+- `--selector "header.navbar"`: element mode, see below
 
-**Scroll capture** (for lazy-loaded content):
-
-```bash
-python scripts/capture_site.py <URL> --scroll-capture
-```
-
-Scrolls through 25%/50%/75% of the page before the screenshot to trigger intersection-observer
-content.
-
-**Element capture** (element mode only — see `references/element-copy.md`):
+**Element capture** (element mode only, see `references/element-copy.md`):
 
 ```bash
 python scripts/capture_site.py <URL> --selector "header.navbar" --output ./element.png
 ```
 
-Screenshots only the first matching element's bounding box and saves its outerHTML
-instead of the full page.
+Screenshots only the first matching element's bounding box and saves its outerHTML.
 
-Then analyze the screenshots as images (Flow 1) plus the rendered HTML.
+**Important user warning:** the first time Playwright runs, it downloads ~300MB of
+Chromium. Warn them so they're not surprised.
 
-**Important user warning:** the first time Playwright runs, it downloads ~300MB of Chromium.
-Warn them so they're not surprised.
+### Step 2.3: without Playwright
+
+If Playwright is not installed and the user doesn't want to install it, use `WebFetch`
+on the URL for content, structure and brand meta (`og:image`, `theme-color`), together
+with the Step 2.1 digest for tokens. Mark typography and component measurements ⚠️
+medium, since they were not read from rendered styles. For framework signals, look at
+class names in what `WebFetch` returns: `bg-blue-500` (Tailwind), `MuiButton-root`
+(Material UI), `chakra-button` (Chakra), `ant-btn` (Ant Design).
 
 ---
 
@@ -188,7 +150,7 @@ Mark this in the `design.md`: tokens with ✅ high confidence are those that cam
 (e.g., "the site rendered on mobile" or "the modal open").
 
 Combine them like this:
-- **HTML + extracted CSS vars** → structure, classes, semantics, explicit tokens
+- **CSS vars digest + computed styles** → explicit tokens, real typography and component values
 - **Screenshot** → visual presentation, real rendered colors, final layout
 - In the `design.md`, "Source" section, cite both sources and clarify what each contributed
 

@@ -5,9 +5,10 @@ capture_site.py — Website capture with Playwright (on-demand)
 This script runs when raw HTML analysis is insufficient (JS-heavy sites,
 SPAs without SSR) or when responsive analysis needs multiple viewports.
 Renders the site in a headless Chromium, attempts to dismiss common
-cookie/consent banners, optionally scrolls to trigger lazy content, then
-saves a full-page screenshot per viewport. Also saves the post-JavaScript
-rendered HTML by default.
+cookie/consent banners, then saves a few viewport-sized frames spread from top
+to bottom (readable, unlike a 15000px full-page PNG) and prints the computed
+styles of typical elements (body, headings, buttons, inputs, cards). Those
+styles are real values from the DOM, so they replace reading the HTML.
 
 Basic usage:
     python capture_site.py https://example.com
@@ -28,8 +29,12 @@ Element capture (for element mode — screenshots one element only):
     With --selector, the screenshot covers only the element's bounding box and
     the saved HTML is the element's outerHTML instead of the full page.
 
-Skip rendered-HTML output:
-    python capture_site.py https://example.com --no-save-html
+More or fewer frames, or the old single full-page PNG:
+    python capture_site.py https://example.com --frames 2
+    python capture_site.py https://example.com --full-page
+
+Also keep the post-JS rendered HTML (large; grep it, never read it whole):
+    python capture_site.py https://example.com --save-html
 
 Requirements:
     pip install playwright
@@ -180,6 +185,77 @@ def scroll_through_page(page, steps=(0.25, 0.5, 0.75, 1.0), pause_ms=400):
     page.wait_for_timeout(pause_ms)
 
 
+def capture_frames(page, base_path, viewport, frames):
+    try:
+        height = page.evaluate("document.documentElement.scrollHeight")
+    except Exception:
+        height = viewport[1]
+    max_scroll = max(0, height - viewport[1])
+    count = max(1, min(frames, 1 + max_scroll // max(1, viewport[1] // 2)))
+    positions = [0] if count == 1 else [round(max_scroll * i / (count - 1)) for i in range(count)]
+
+    paths = []
+    stem, suffix = base_path.stem, base_path.suffix or ".png"
+    for i, top in enumerate(positions, 1):
+        page.evaluate(f"window.scrollTo(0, {top})")
+        page.wait_for_timeout(500)
+        path = base_path.with_name(f"{stem}-{i:02d}{suffix}")
+        page.screenshot(path=str(path))
+        paths.append(path)
+    page.evaluate("window.scrollTo(0, 0)")
+    print(f"   Page height: {height}px, {len(paths)} frame(s) of {viewport[0]}x{viewport[1]}")
+    return paths
+
+
+STYLE_PROBE_JS = r"""
+() => {
+  const pick = ['font-family','font-size','font-weight','line-height','letter-spacing','color',
+                'background-color','border-radius','padding','border','box-shadow','text-transform'];
+  const skip = {'letter-spacing':'normal','box-shadow':'none','text-transform':'none',
+                'background-color':'rgba(0, 0, 0, 0)','border-radius':'0px','padding':'0px'};
+  const visible = el => { const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
+  const describe = el => { const cs = getComputedStyle(el); const out = [];
+    for (const p of pick) { let v = cs.getPropertyValue(p);
+      if (!v || skip[p] === v || (p === 'border' && /^0px/.test(v))) continue;
+      if (p === 'font-family') v = v.split(',').slice(0, 2).join(',');
+      if (p === 'box-shadow') { v = v.split(/,(?![^(]*\))/).map(x => x.trim())
+          .filter(x => !/^rgba\(0, 0, 0, 0\)/.test(x)).join(', '); if (!v) continue; }
+      if (p === 'border-radius' && parseFloat(v) > 999) v = '9999px (pill)';
+      out.push(`${p}: ${v}`); }
+    return out.join('; '); };
+  const lines = [];
+  const once = (label, selector, limit = 1) => {
+    const seen = new Set(); let n = 0;
+    for (const el of document.querySelectorAll(selector)) {
+      if (n >= limit || !visible(el) || /^skip to/i.test((el.innerText || '').trim())) continue;
+      const d = describe(el); if (seen.has(d)) continue;
+      seen.add(d); n++;
+      const text = (el.innerText || el.value || '').trim().replace(/\s+/g, ' ').slice(0, 28);
+      lines.push(`${label}${text ? ` "${text}"` : ''}: ${d}`);
+    }
+  };
+  once('body', 'body');
+  ['h1','h2','h3'].forEach(h => once(h, h));
+  once('p', 'main p, p', 2);
+  once('a', 'main a, a', 2);
+  once('button', 'button, a[class*="button" i], a[class*="btn" i], [role="button"]', 4);
+  once('input', 'input:not([type="hidden"]), textarea, select');
+  once('header', 'header, nav');
+  once('card', '[class*="card" i]', 2);
+  return lines;
+}
+"""
+
+
+def computed_style_digest(page):
+    try:
+        page.evaluate("window.scrollTo(0, 0)")
+        return page.evaluate(STYLE_PROBE_JS)
+    except Exception as e:
+        return [f"(style probe failed: {e})"]
+
+
 def output_path_for_viewport(base_path: Path, label: str, total: int) -> Path:
     """
     Build the per-viewport output path. For a single viewport, return base_path
@@ -204,6 +280,9 @@ def capture_one(
     user_agent=DEFAULT_USER_AGENT,
     wait_until="networkidle",
     timeout=30000,
+    full_page=False,
+    frames=4,
+    styles=True,
 ):
     """Capture a single viewport. Returns the output path."""
     from playwright.sync_api import sync_playwright
@@ -266,15 +345,27 @@ def capture_one(
                 outer_html = locator.evaluate("el => el.outerHTML")
                 html_path.write_text(outer_html, encoding="utf-8")
                 print(f"   Element outerHTML saved: {html_path}")
-        else:
+        elif full_page:
             page.screenshot(path=str(output_path), full_page=True)
             print(f"   Screenshot saved: {output_path}")
+        else:
+            for frame_path in capture_frames(page, output_path, viewport, frames):
+                print(f"   Frame saved: {frame_path}")
 
+        if styles and not selector:
+            print("   Computed styles (from the live DOM, high confidence):")
+            for line in computed_style_digest(page):
+                print(f"     {line}")
+
+        if not selector:
             if save_html:
                 html_path = output_path.with_suffix(".html")
                 html_content = page.content()
                 html_path.write_text(html_content, encoding="utf-8")
-                print(f"   Rendered HTML saved: {html_path}")
+                print(
+                    f"   Rendered HTML saved: {html_path} ({len(html_content) // 1024} KB; "
+                    "grep it, never read it whole)"
+                )
 
         try:
             title = page.title()
@@ -318,17 +409,37 @@ def main():
         help="Legacy single-viewport flag (WxH). Use --viewports for multi-viewport.",
     )
     parser.add_argument(
+        "--frames",
+        type=int,
+        default=4,
+        help="Viewport-sized frames per viewport, spread top to bottom (default: 4).",
+    )
+    parser.add_argument(
+        "--full-page",
+        action="store_true",
+        help="One full-page PNG instead of frames. Tall pages become unreadable once "
+             "a vision model downscales them; prefer frames.",
+    )
+    parser.add_argument(
+        "--no-styles",
+        dest="styles",
+        action="store_false",
+        default=True,
+        help="Skip the computed-style digest.",
+    )
+    parser.add_argument(
         "--save-html",
         dest="save_html",
         action="store_true",
-        default=True,
-        help="Also save the post-JS rendered HTML (default: on).",
+        default=None,
+        help="Save the rendered HTML (default: off for pages, on for --selector, "
+             "where it is the element's outerHTML).",
     )
     parser.add_argument(
         "--no-save-html",
         dest="save_html",
         action="store_false",
-        help="Skip saving the post-JS rendered HTML.",
+        help="Never save HTML, not even the element's outerHTML.",
     )
     parser.add_argument(
         "--no-dismiss-cookies",
@@ -391,13 +502,16 @@ def main():
                 output_path=out,
                 viewport=viewport,
                 label=label,
-                save_html=args.save_html,
+                save_html=args.save_html if args.save_html is not None else bool(args.selector),
                 dismiss_cookies=args.dismiss_cookies,
                 scroll_capture=args.scroll_capture,
                 selector=args.selector,
                 user_agent=args.user_agent,
                 wait_until=args.wait_until,
                 timeout=args.timeout,
+                full_page=args.full_page,
+                frames=args.frames,
+                styles=args.styles,
             )
     except Exception as e:
         print(f"Error during capture: {e}", file=sys.stderr)
